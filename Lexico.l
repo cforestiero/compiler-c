@@ -26,24 +26,24 @@ CTE_CADENA      \"([^\"\\\\]|\\\\.)*\"
 ID			    {LETRA}({LETRA}|{DIGITO})*
 
 
-OP_ASIG   		[":="]
-OP_SUM          ["+"]
-OP_MUL          ["*"]
-OP_RES          ["-"]
-OP_DIV          ["/"]
-PAR_A			["("]
-PAR_C			[")"]
-LLAVE_A         ["{"]
-LLAVE_C         ["}"]
-COMA            [","]
-PUNTO           ["."]
-DOS_PUNTOS      [":"]
-COMP_MAYOR      [">"]
-COMP_MENOR      ["<"]
-COMP_MENORIGUAL ["<="]
-COMP_MAYORIGUAL [">="]
-COMP_IGUAL      ["=="]
-COMP_DISTINTO   ["!="]
+OP_ASIG   		":="
+OP_SUM          "+"
+OP_RES          "-"
+OP_MUL          "*"
+OP_DIV          "/"
+PAR_A			"("
+PAR_C			")"
+LLAVE_A         "{"
+LLAVE_C         "}"
+COMA            ","
+PUNTO           "."
+DOS_PUNTOS      ":"
+COMP_MAYOR      ">"
+COMP_MENOR      "<"
+COMP_MENORIGUAL "<="
+COMP_MAYORIGUAL ">="
+COMP_IGUAL      "=="
+COMP_DISTINTO   "!="
 
 %%
 
@@ -91,8 +91,8 @@ COMP_DISTINTO   ["!="]
 {ID}            {printf("\nIdentificador: %s\n", yytext);}
 {OP_ASIG}       {printf("\nAsignacion: %s\n", yytext);}
 {OP_SUM}        {printf("\nSuma: %s\n", yytext);}
-{OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);}
 {OP_RES}        {printf("\nResta: %s\n", yytext);}
+{OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);}
 {OP_DIV}        {printf("\nDivision: %s\n", yytext);}
 {PAR_A}         {printf("\nParentesisAbre: %s\n", yytext);}
 {PAR_C}         {printf("\nParentesisCierra: %s\n", yytext);}
@@ -101,10 +101,10 @@ COMP_DISTINTO   ["!="]
 {COMA}          {printf("\nComa: %s\n", yytext);}      
 {PUNTO}         {printf("\nPunto: %s\n", yytext);} 
 {DOS_PUNTOS}    {printf("\nDosPuntos: %s\n", yytext);}
-COMP_MENORIGUAL {printf("\nMenorIgual: %s\n", yytext);}
-COMP_MAYORIGUAL {printf("\nMayorIgual: %s\n", yytext);}
-COMP_IGUAL      {printf("\nIgual: %s\n", yytext);}      
-COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);}   
+{COMP_MENORIGUAL} {printf("\nMenorIgual: %s\n", yytext);}
+{COMP_MAYORIGUAL} {printf("\nMayorIgual: %s\n", yytext);}
+{COMP_IGUAL}      {printf("\nIgual: %s\n", yytext);}      
+{COMP_DISTINTO}   {printf("\nDistinto: %s\n", yytext);}   
 {COMP_MAYOR}    {printf("\nMayor: %s\n", yytext);} 
 {COMP_MENOR}    {printf("\nMenor: %s\n", yytext);}
 
@@ -129,9 +129,9 @@ int main(int argc, char *argv[])
         printf("Entre aca");
     }
  
-    printf("Iniciando analisis lexico...\n");
+    printf("Iniciando analisis lexico...\n\n");
     yylex();
-    printf("Analisis lexico completado.\n");
+    printf("\n\nAnalisis lexico completado.\n");
 
     fclose(yyin);
     return 0;
