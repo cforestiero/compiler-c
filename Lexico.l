@@ -116,7 +116,7 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
 
 void yyerror(const char *mensajeError)
 {     
-    fprintf(stderr, "ERROR: %s en la línea %d\n", mensajeError, yylineno);     
+    fprintf(stderr, "ERROR: %s en la linea %d\n", mensajeError, yylineno);     
     
     exit(1); 
 }

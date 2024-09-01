@@ -13,15 +13,44 @@ FILE  *yyin;
 
 %}
 
-%token CTE
+%token CTE_ENTERA
+%token CTE_REAL
+%token CTE_CADENA
+%token COMENTARIO
 %token ID
-%token OP_AS
+%token OP_ASIG
 %token OP_SUM
 %token OP_MUL
 %token OP_RES
 %token OP_DIV
-%token PA
-%token PC
+%token PAR_A
+%token PAR_C
+%token LLAVE_A
+%token LLAVE_C
+%token COMA
+%token PUNTO
+%token DOS_PUNTOS
+%token COMP_MAYOR
+%token COMP_MENOR
+%token COMP_MAYORIGUAL
+%token COMP_MENORIGUAL
+%token COMP_IGUAL
+%token COMP_DISTINTO
+%token BINARYCOUNT
+%token TRIANGULO
+%token MIENTRAS
+%token SINO
+%token SI
+%token ESCRIBIR
+%token LEER
+%token FLOAT
+%token INT
+%token STRING
+%token AND
+%token OR
+%token NOT
+%token INIT
+
 
 %%
 sentencia:  	   
