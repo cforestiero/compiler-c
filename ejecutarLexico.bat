@@ -11,6 +11,9 @@ pause
 :: Ejecutar el compilador con el archivo de prueba
 compilador.exe prueba.txt
 
+:: Pausar para ver lo que hace
+pause
+
 :: Limpiar los archivos generados
 @echo off
 del compilador.exe
