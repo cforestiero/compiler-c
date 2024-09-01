@@ -108,6 +108,7 @@ COMP_DISTINTO   "!="
 {COMP_MAYOR}    {printf("\nMayor: %s\n", yytext);} 
 {COMP_MENOR}    {printf("\nMenor: %s\n", yytext);}
 
+
 "\n"      		
 "\t"
 "\n\t"
