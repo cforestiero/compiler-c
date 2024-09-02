@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include "y.tab.h"
 
 FILE  *yyin;
@@ -10,7 +9,7 @@ int yylval;
 char *yyltext;
 
 int yyerror(void);
-void yyerror2(const char *mensajeError);
+
 
 %}
 
@@ -93,10 +92,10 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
 {CTE_BINARIA}   {printf("\nConstanteBinaria: %s\n", yytext);return CTE_BINARIA;}
 {CTE_ENTERA}    {
                     long valor = strtol(yytext, NULL, 10); 
-                    if (valor < -32768 || valor > 65535) {
-                        char mensaje[100];
-                        sprintf(mensaje, "ERROR LEXICO: Constante %s fuera de rango para un int de 16 bits", yytext);
-                        yyerror2(mensaje);
+                    if (valor < -32768 || valor > 65535)
+                    {
+                        printf("\nERROR LEXICO: Constante %s fuera de rango para un Int de 16 bits.\n", yytext);
+                        exit(1);
                     }
                     printf("\nConstanteEntera: %s\n", yytext);
                     return CTE_ENTERA;
@@ -105,20 +104,20 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
                     double valor = strtod(yytext, NULL); 
                     if (valor < -3.402823e+38 || valor > 3.402823e+38) 
                     {         
-                        yyerror2("Constante float fuera de rango para un float de 32 bits");     
+                        printf("\nConstante %f fuera de rango para un Float de 32 bits.\n", yytext);  
+                        exit(1);   
                     }    
-                        printf("Float valido: %f\n", valor); 
-                        return CTE_REAL; 
-                    }
+                    printf("ConstanteReal: %f\n", valor); 
+                    return CTE_REAL; 
+                }
 {CTE_CADENA}    {     
                     if (strlen(yytext) - 2 > 40) 
                     {          
-                        yyerror2("String excede los 40 caracteres permitidos");     
-                    } 
-                    else {         
-                        printf("String valido: %s\n", yytext);     
-                    }     
-                    return CTE_CADENA; }
+                        printf("\nString %s excede los 40 caracteres permitidos.\n", yytext);     
+                    }       
+                    printf("\nConstanteCadena: %s\n", yytext);   
+                    return CTE_CADENA; 
+                }
 
 {COMENTARIO}    {printf("\nComentario: %s\n", yytext);}
 
@@ -127,12 +126,4 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
 "\n\t"
 " "             		
 "\r\n"
-.			    { yyerror2("Caracter no reconocido"); }
-
-%%
-
- 
-void yyerror2(const char *mensajeError) {     
-    fprintf(stderr, "ERROR: %s en la linea %d\n", mensajeError, yylineno);     
-    exit(1); 
-}
+.			    { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
