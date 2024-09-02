@@ -5,8 +5,8 @@
 int yystopparser=0;
 FILE  *yyin;
 
-  int yyerror();
-  int yylex();
+int yyerror();
+int yylex();
 
 
 %}
@@ -14,7 +14,7 @@ FILE  *yyin;
 %token CTE_ENTERA
 %token CTE_REAL
 %token CTE_CADENA
-%token COMENTARIO
+%token CTE_BINARIA
 %token ID
 %token OP_ASIG
 %token OP_SUM
@@ -25,6 +25,8 @@ FILE  *yyin;
 %token PAR_C
 %token LLAVE_A
 %token LLAVE_C
+%token CORCHETE_A
+%token CORCHETE_C
 %token COMA
 %token PUNTO
 %token DOS_PUNTOS
@@ -96,6 +98,8 @@ sentencia:
 
 asignacion:
         ID OP_ASIG expresion {printf("	ID := Expresion es Asignacion\n");}
+        | ID OP_ASIG funcion_triangulo {printf("	ID := Funcion_triangulo es Asignacion\n");}
+        | ID OP_ASIG funcion_binaryCount {printf("	ID := Funcion_binaryCount es Asignacion\n");}
         ;
 
 seleccion:
@@ -162,15 +166,31 @@ factor:
       ID {printf("    ID es Factor \n");}
       | CTE_ENTERA {printf("    CTE_ENTERA es Factor\n");}
       | CTE_REAL {printf("    CTE_REAL es Factor\n");}
-	    | PA expresion PC {printf("    Expresion entre parentesis es Factor\n");}
+	    | PAR_A expresion PAR_C {printf("    Expresion entre parentesis es Factor\n");}
      	;
 
-triangulo:
-
+funcion_triangulo:
+      TRIANGULO PAR_A lista_parametros PAR_C {printf("	triangulo (Lista_parametros)es Triangulo\n");}
       ;
 
-binaryCount:
+lista_parametros:
+       expresion COMA expresion COMA expresion {printf("	Expresion, Expresion, Expresion es Lista_parametros\n");}
+      ;
 
+funcion_binaryCount:
+      BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {printf("	binaryCount ( [Lista] ) es BinaryCount\n");}
+      ;
+
+lista:
+      elemento {printf("	Elemento es Lista\n");}
+      | lista COMA elemento {printf("	Lista , Elemento es Lista\n");}
+      ;
+
+elemento:
+      ID {printf("	ID es Elemento\n");}
+      | CTE_ENTERA {printf("	CTE_ENTERA es Elemento\n");}
+      | CTE_REAL {printf("	CTE_REAL es Elemento\n");}
+      | CTE_BINARIA {printf("	CTE_BINARIA es Elemento\n");}
       ;
 
 %%
@@ -189,12 +209,14 @@ int main(int argc, char *argv[])
         yyparse();
         
     }
-	fclose(yyin);
-        return 0;
+    fclose(yyin);
+
+    return 0;
 }
+
 int yyerror(void)
-     {
-       printf("Error Sintactico\n");
-	 exit (1);
-     }
+{
+    printf("Error Sintactico\n");
+	  exit (1);
+}
 

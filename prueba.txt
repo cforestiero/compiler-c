@@ -1,2 +1,7 @@
-c:=d*(e-11.)/4 *-hola-*
+init
+{
+a : Int
+}
 
+y := triangulo(x, 1+1, x)
+y := binaryCount([0b110,0b1,0,5,x,0b10101100,-1])
