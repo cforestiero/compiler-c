@@ -55,12 +55,12 @@ int yylex();
 %%
 
 programa:
-        init bloque {printf("           El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");}
+        init bloque {printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");}
         ;
 
 bloque:
-        bloque sentencia {printf("              El analizador sintactico reconoce a: <Bloque> --> <Bloque> <Sentencia>\n\n");}
-        | sentencia {printf("           El analizador sintactico reconoce: <Bloque> --> <Sentencia>\n\n");}
+        bloque sentencia {printf("                El analizador sintactico reconoce a: <Bloque> --> <Bloque> <Sentencia>\n\n");}
+        | sentencia {printf("                El analizador sintactico reconoce: <Bloque> --> <Sentencia>\n\n");}
         ;
 
 init:
@@ -107,89 +107,89 @@ seleccion:
         ;
 
 condicion:
-        comparacion {printf("	Comparacion es Condicion\n");}
-        | comparacion AND comparacion {printf("	Comparacion AND Comparacion es Condicion\n");}
-        | comparacion OR comparacion {printf("	Comparacion OR Comparacion es Condicion\n");}
-        | NOT comparacion {printf("	NOT Comparacion es Condicion\n");}
+        comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion>\n\n");}
+        | comparacion AND comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion> AND <Condicion>\n\n");}
+        | comparacion OR comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion> OR <Condicion>\n\n");}
+        | NOT comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> NOT <Condicion>\n\n");}
         ;
 
 comparacion:
-        expresion comparador expresion {printf("	Expresion Comparador Expresion es Comparacion\n");}
+        expresion comparador expresion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Expresion> <Comparador> <Expresion>\n\n");}
         ;
 
 comparador:
-        COMP_MAYOR {printf("	COMP_MAYOR es Comparador\n");}
-        | COMP_MENOR {printf("	COMP_MENOR es Comparador\n");}
-        | COMP_MAYORIGUAL {printf("	COMP_MAYORIGUAL es Comparador\n");}
-        | COMP_MENORIGUAL {printf("	COMP_MENORIGUAL es Comparador\n");}
-        | COMP_IGUAL {printf("	COMP_IGUAL es Comparador\n");}
-        | COMP_DISTINTO {printf("	COMP_DISTINTO es Comparador\n");}
+        COMP_MAYOR {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYOR\n\n");}
+        | COMP_MENOR {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENOR\n\n");}
+        | COMP_MAYORIGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYORIGUAL\n\n");}
+        | COMP_MENORIGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENORIGUAL\n\n");}
+        | COMP_IGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_IGUAL\n\n");}
+        | COMP_DISTINTO {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_DISTINTO\n\n");}
         ; 
 
 iteracion:
-        MIENTRAS PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("	mientras (condicion) {bloque} es Iteracion\n");}
+        MIENTRAS PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Iteracion> --> MIENTRAS PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C \n\n");}
         ;
 
 escritura:
-        ESCRIBIR PAR_A salida PAR_C {printf("	escribir (salida) es Escritura\n");}
+        ESCRIBIR PAR_A salida PAR_C {printf("                El analizador sintactico reconoce: <Escritura> --> ESCRIBIR PAR_A <Salida> PAR_C\n\n");}
         ;
 
 salida:
-        ID {printf("	ID es Salida\n");}
-        | CTE_CADENA {printf("	CTE_CADENA es Salida\n");}
-        | CTE_ENTERA {printf("	CTE_ENTERA es Salida\n");}
-        | CTE_REAL {printf("	CTE_REAL es Salida\n");}
+        ID {printf("                El analizador sintactico reconoce: <Salida> --> ID\n\n");}
+        | CTE_CADENA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_CADENA\n\n");}
+        | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_ENTERA\n\n");}
+        | CTE_REAL {printf("                El analizador sintactico reconoce: <Salida> --> CTE_REAL\n\n");}
         ;
 
 lectura:
-        LEER PAR_A entrada PAR_C {printf("	leer (entrada) es Lectura\n");}
+        LEER PAR_A entrada PAR_C {printf("                El analizador sintactico reconoce: <Lectura> --> LEER PAR_A <Entrada> PAR_C\n\n");}
         ;
 
 entrada:
-        ID {printf("	ID es Entrada\n");}
+        ID {printf("                El analizador sintactico reconoce: <Entrada> --> ID\n\n");}
         ;
 
 expresion:
-        termino {printf("    Termino es Expresion\n");}
-	      |expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n");}
-	      |expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n");}
+        termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Termino>\n\n");}
+	      |expresion OP_SUM termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
+	      |expresion OP_RES termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> P_RES <Termino>\n\n");}
 	      ;
 
 termino: 
-       factor {printf("    Factor es Termino\n");}
-       |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
-       |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+       factor {printf("                El analizador sintactico reconoce: <Termino> --> <Factor>\n\n");}
+       |termino OP_MUL factor {printf("                El analizador sintactico reconoce: <Termino> --> <Termino> OP_MUL <Factor>\n\n");}
+       |termino OP_DIV factor {printf("                El analizador sintactico reconoce: <Termino> --> <Termino> OP_DIV <Factor>\n\n");}
        ;
 
 factor: 
-      ID {printf("    ID es Factor \n");}
-      | CTE_ENTERA {printf("    CTE_ENTERA es Factor\n");}
-      | CTE_REAL {printf("    CTE_REAL es Factor\n");}
-	    | PAR_A expresion PAR_C {printf("    Expresion entre parentesis es Factor\n");}
+      ID {printf("                El analizador sintactico reconoce: <Factor> --> ID\n\n");}
+      | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");}
+      | CTE_REAL {printf("                El analizador sintactico reconoce: <Factor> --> CTE_REAL\n\n");}
+      | PAR_A expresion PAR_C {printf("                El analizador sintactico reconoce: <Factor> --> PAR_A <Expresion> PAR_C\n\n");}
      	;
 
 funcion_triangulo:
-      TRIANGULO PAR_A lista_parametros PAR_C {printf("	triangulo (Lista_parametros)es Triangulo\n");}
+      TRIANGULO PAR_A lista_parametros PAR_C {printf("                El analizador sintactico reconoce: <Funcion_triangulo> --> TRIANGULO PAR_A <Lista_parametros> PAR_C\n\n");}
       ;
 
 lista_parametros:
-       expresion COMA expresion COMA expresion {printf("	Expresion, Expresion, Expresion es Lista_parametros\n");}
+       expresion COMA expresion COMA expresion {printf("                El analizador sintactico reconoce: <Lista_parametros> --> <Expresion> COMA <Expresion> COMA <Expresion>\n\n");}
       ;
 
 funcion_binaryCount:
-      BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {printf("	binaryCount ( [Lista] ) es BinaryCount\n");}
+      BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {printf("                El analizador sintactico reconoce: <Funcion_binaryCount> --> BINARYCOUNT PAR_A CORCHETE_A <Lista> CORCHETE_C PAR_C\n\n");}
       ;
 
 lista:
-      elemento {printf("	Elemento es Lista\n");}
-      | lista COMA elemento {printf("	Lista , Elemento es Lista\n");}
+      elemento {printf("                El analizador sintactico reconoce: <Lista> --> <Elemento>\n\n");}
+      | lista COMA elemento {printf("                El analizador sintactico reconoce: <Lista> --> <Lista> COMA <Elemento>\n\n");}
       ;
 
 elemento:
-      ID {printf("	ID es Elemento\n");}
-      | CTE_ENTERA {printf("	CTE_ENTERA es Elemento\n");}
-      | CTE_REAL {printf("	CTE_REAL es Elemento\n");}
-      | CTE_BINARIA {printf("	CTE_BINARIA es Elemento\n");}
+      ID {printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");}
+      | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Elemento> --> CTE_ENTERA\n\n");}
+      | CTE_REAL {printf("                El analizador sintactico reconoce: <Elemento> --> CTE_REAL\n\n");}
+      | CTE_BINARIA {printf("                El analizador sintactico reconoce: <Elemento> --> CTE_BINARIA\n\n");}
       ;
 
 %%
