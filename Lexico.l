@@ -48,78 +48,78 @@ COMP_DISTINTO   "!="
 %%
 
 \*-[^\*]*\*-.*  { 
-                    printf("\nERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
+                    printf("ERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
                     exit(1);
                 }   
 
-"*-".*"-*"        { printf("\nComentario: %s\n", yytext); }
+"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
 
                     
-"binaryCount"   {printf("\nBinaryCount: %s\n", yytext);return BINARYCOUNT;}
-"triangulo"     {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
-"mientras"      {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
-"sino"          {printf("\nSino: %s\n", yytext);return SINO;}
-"si"            {printf("\nSi: %s\n", yytext);return SI;}
-"escribir"      {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
-"leer"          {printf("\nLeer: %s\n", yytext);return LEER;}
-"Float"         {printf("\nFloat: %s\n", yytext);return FLOAT;}
-"Int"           {printf("\nInt: %s\n", yytext);return INT;}
-"String"        {printf("\nString: %s\n", yytext);return STRING;}
-"AND"           {printf("\nAnd: %s\n", yytext);return AND;}
-"OR"            {printf("\nOr: %s\n", yytext);return OR;}
-"NOT"           {printf("\nNot: %s\n", yytext);return NOT;}
-"init"          {printf("\nInit: %s\n", yytext);return INIT;}
+"binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
+"triangulo"     {printf("El analizador lexico reconoce a: %s como Triangulo\n", yytext); return TRIANGULO;}
+"mientras"      {printf("El analizador lexico reconoce a: %s como Mientras\n", yytext); return MIENTRAS;}
+"sino"          {printf("El analizador lexico reconoce a: %s como Sino\n", yytext); return SINO;}
+"si"            {printf("El analizador lexico reconoce a: %s como Si\n", yytext); return SI;}
+"escribir"      {printf("El analizador lexico reconoce a: %s como Escribir\n", yytext); return ESCRIBIR;}
+"leer"          {printf("El analizador lexico reconoce a: %s como Leer\n", yytext); return LEER;}
+"Float"         {printf("El analizador lexico reconoce a: %s como Float\n", yytext); return FLOAT;}
+"Int"           {printf("El analizador lexico reconoce a: %s como Int\n", yytext); return INT;}
+"String"        {printf("El analizador lexico reconoce a: %s como String\n", yytext); return STRING;}
+"AND"           {printf("El analizador lexico reconoce a: %s como And\n", yytext); return AND;}
+"OR"            {printf("El analizador lexico reconoce a: %s como Or\n", yytext); return OR;}
+"NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
+"init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); return INIT;}
 
 
-{ID}            {printf("\nIdentificador: %s\n", yytext);return ID;}
-{OP_ASIG}       {printf("\nAsignacion: %s\n", yytext);return OP_ASIG;}
-{OP_SUM}        {printf("\nSuma: %s\n", yytext);return OP_SUM;}
-{OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
-{OP_RES}        {printf("\nResta: %s\n", yytext);return OP_RES;}
-{OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
-{PAR_A}         {printf("\nParentesisAbre: %s\n", yytext);return PAR_A;}
-{PAR_C}         {printf("\nParentesisCierra: %s\n", yytext);return PAR_C;}
-{LLAVE_A}       {printf("\nLlaveAbre: %s\n", yytext);return LLAVE_A;}
-{LLAVE_C}       {printf("\nLlaveCierra: %s\n", yytext);return LLAVE_C;}
-{CORCHETE_A}    {printf("\nCorcheteAbre: %s\n", yytext);return CORCHETE_A;}
-{CORCHETE_C}    {printf("\nCorcheteCierra: %s\n", yytext);return CORCHETE_C;}
-{COMA}          {printf("\nComa: %s\n", yytext);return COMA;}      
-{PUNTO}         {printf("\nPunto: %s\n", yytext);return PUNTO;} 
-{DOS_PUNTOS}    {printf("\nDosPuntos: %s\n", yytext);return DOS_PUNTOS;}
-COMP_MENORIGUAL {printf("\nMenorIgual: %s\n", yytext);return COMP_MENORIGUAL;}
-COMP_MAYORIGUAL {printf("\nMayorIgual: %s\n", yytext);return COMP_MAYORIGUAL;}
-COMP_IGUAL      {printf("\nIgual: %s\n", yytext);return COMP_IGUAL;}      
-COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}   
-{COMP_MAYOR}    {printf("\nMayor: %s\n", yytext);return COMP_MAYOR;} 
-{COMP_MENOR}    {printf("\nMenor: %s\n", yytext);return COMP_MENOR;}
+{ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); return ID;}
+{OP_ASIG}       {printf("El analizador lexico reconoce a: %s como Asignacion\n", yytext); return OP_ASIG;}
+{OP_SUM}        {printf("El analizador lexico reconoce a: %s como Suma\n", yytext); return OP_SUM;}
+{OP_MUL}        {printf("El analizador lexico reconoce a: %s como Multiplicacion\n", yytext); return OP_MUL;}
+{OP_RES}        {printf("El analizador lexico reconoce a: %s como Resta\n", yytext); return OP_RES;}
+{OP_DIV}        {printf("El analizador lexico reconoce a: %s como Division\n", yytext); return OP_DIV;}
+{PAR_A}         {printf("El analizador lexico reconoce a: %s como Parentesis Abre\n", yytext); return PAR_A;}
+{PAR_C}         {printf("El analizador lexico reconoce a: %s como Parentesis Cierra\n", yytext); return PAR_C;}
+{LLAVE_A}       {printf("El analizador lexico reconoce a: %s como Llave Abre\n", yytext); return LLAVE_A;}
+{LLAVE_C}       {printf("El analizador lexico reconoce a: %s como Llave Cierra\n", yytext); return LLAVE_C;}
+{CORCHETE_A}    {printf("El analizador lexico reconoce a: %s como Corchete Abre\n", yytext); return CORCHETE_A;}
+{CORCHETE_C}    {printf("El analizador lexico reconoce a: %s como Corchete Cierra\n", yytext); return CORCHETE_C;}
+{COMA}          {printf("El analizador lexico reconoce a: %s como Coma\n", yytext); return COMA;}
+{PUNTO}         {printf("El analizador lexico reconoce a: %s como Punto\n", yytext); return PUNTO;}
+{DOS_PUNTOS}    {printf("El analizador lexico reconoce a: %s como Dos Puntos\n", yytext); return DOS_PUNTOS;}
+COMP_MENORIGUAL {printf("El analizador lexico reconoce a: %s como Menor Igual\n", yytext); return COMP_MENORIGUAL;}
+COMP_MAYORIGUAL {printf("El analizador lexico reconoce a: %s como Mayor Igual\n", yytext); return COMP_MAYORIGUAL;}
+COMP_IGUAL      {printf("El analizador lexico reconoce a: %s como Igual\n", yytext); return COMP_IGUAL;}
+COMP_DISTINTO   {printf("El analizador lexico reconoce a: %s como Distinto\n", yytext); return COMP_DISTINTO;}
+{COMP_MAYOR}    {printf("El analizador lexico reconoce a: %s como Mayor\n", yytext); return COMP_MAYOR;}
+{COMP_MENOR}    {printf("El analizador lexico reconoce a: %s como Menor\n", yytext); return COMP_MENOR;}
 
-{CTE_BINARIA}   {printf("\nConstanteBinaria: %s\n", yytext);return CTE_BINARIA;}
+{CTE_BINARIA}   {printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); return CTE_BINARIA;}
 {CTE_ENTERA}    {
                     long valor = strtol(yytext, NULL, 10); 
                     if (valor < -32768 || valor > 65535)
                     {
-                        printf("\nERROR LEXICO: Constante %s fuera de rango para un Int de 16 bits.\n", yytext);
+                        printf("ERROR LEXICO: Constante %s fuera de rango para un Int de 16 bits.\n", yytext);
                         exit(1);
                     }
-                    printf("\nConstanteEntera: %s\n", yytext);
+                    printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
                     return CTE_ENTERA;
                 }
 {CTE_REAL}      {     
                     double valor = strtod(yytext, NULL); 
                     if (valor < -3.402823e+38 || valor > 3.402823e+38) 
                     {         
-                        printf("\nConstante %f fuera de rango para un Float de 32 bits.\n", yytext);  
+                        printf("ERROR LEXICO: Constante %f fuera de rango para un Float de 32 bits.\n", valor);  
                         exit(1);   
                     }    
-                    printf("ConstanteReal: %f\n", valor); 
+                    printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
                     return CTE_REAL; 
                 }
 {CTE_CADENA}    {     
                     if (strlen(yytext) - 2 > 40) 
                     {          
-                        printf("\nString %s excede los 40 caracteres permitidos.\n", yytext);     
+                        printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
                     }       
-                    printf("\nConstanteCadena: %s\n", yytext);   
+                    printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext);   
                     return CTE_CADENA; 
                 }
 
@@ -128,4 +128,4 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
 "\n\t"
 " "             		
 "\r\n"
-.			    { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
+.			    { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}

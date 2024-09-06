@@ -55,56 +55,55 @@ int yylex();
 %%
 
 programa:
-        init sentencia {printf("	Init Sentencia es Programa\n");}
-        | init bloque sentencia {printf("	Init Bloque Sentencia es Programa\n");}
+        init bloque {printf("           El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");}
         ;
 
 bloque:
-        bloque sentencia {printf("	Bloque Sentencia es Bloque\n");}
-        | sentencia {printf("	Sentencia es Bloque\n");}
+        bloque sentencia {printf("              El analizador sintactico reconoce a: <Bloque> --> <Bloque> <Sentencia>\n\n");}
+        | sentencia {printf("           El analizador sintactico reconoce: <Bloque> --> <Sentencia>\n\n");}
         ;
 
 init:
-        INIT LLAVE_A bloque_declaracion LLAVE_C {printf("	init { Bloque_declaracion } es Init\n");}
+        INIT LLAVE_A bloque_declaracion LLAVE_C {printf("                El analizador sintactico reconoce: <Init> --> INIT LLAVE_A <Bloque_declaracion> LLAVE_C\n\n");}
         ;
 
 bloque_declaracion:
-        bloque_declaracion declaracion {printf("	Bloque_declaracion Declaracion es Bloque_declaracion\n");}
-        | declaracion {printf("	Declaracion es Bloque_declaracion\n");}
+        bloque_declaracion declaracion {printf("                El analizador sintactico reconoce: <Bloque_declaracion> --> <Bloque_declaracion> <Declaracion> es \n\n");}
+        | declaracion {printf("                El analizador sintactico reconoce: <Bloque_declaracion> --> <Declaracion>\n\n");}
         ;
 
 declaracion:
-        lista_de_variables DOS_PUNTOS tipo_de_dato {printf("	Lista_de_variables : Tipo_de_dato es Declaracion\n");}
+        lista_de_variables DOS_PUNTOS tipo_de_dato {printf("                El analizador sintactico reconoce: <Declaracion> --> <Lista_de_variables> DOS_PUNTOS <Tipo_de_dato>\n\n");}
         ;
 
 lista_de_variables:
-        lista_de_variables COMA ID {printf("	Lista_de_variables , ID es Lista_de_variables\n");}
-        | ID {printf("	ID es Lista_de_variables\n");}
+        lista_de_variables COMA ID {printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
+        | ID {printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
         ;
 
 tipo_de_dato:
-        INT {printf("	Int es Tipo_de_dato\n");}
-        | FLOAT {printf("	Float es Tipo_de_dato\n");}
-        | STRING {printf("	String es Tipo_de_dato\n");}
+        INT {printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> INT\n\n");}
+        | FLOAT {printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> FLOAT\n\n");}
+        | STRING {printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> STRING\n\n");}
         ;
 
 sentencia:
-        asignacion {printf("	Asignacion es Sentencia\n");}
-        | iteracion {printf("	Iteracion es Sentencia\n");}
-        | seleccion {printf("	Seleccion es Sentencia\n");}
-        | escritura {printf("	Escritura es Sentencia\n");}
-        | lectura {printf("	Lectura es Sentencia\n");}
+        asignacion {printf("                El analizador sintactico reconoce: <Sentencia> --> OP_ASIG\n\n");}
+        | iteracion {printf("                El analizador sintactico reconoce: <Sentencia> --> MIENTRAS\n\n");}
+        | seleccion {printf("                El analizador sintactico reconoce: <Sentencia> --> SI\n\n");}                     
+        | escritura {printf("                El analizador sintactico reconoce: <Sentencia> --> ESCRIBIR\n\n");}
+        | lectura {printf("                El analizador sintactico reconoce: <Sentencia> --> LEER\n\n");}
         ;
 
 asignacion:
-        ID OP_ASIG expresion {printf("	ID := Expresion es Asignacion\n");}
-        | ID OP_ASIG funcion_triangulo {printf("	ID := Funcion_triangulo es Asignacion\n");}
-        | ID OP_ASIG funcion_binaryCount {printf("	ID := Funcion_binaryCount es Asignacion\n");}
+        ID OP_ASIG expresion {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");}
+        | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG TRIANGULO\n");}
+        | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG BINARYCOUNT\n");}
         ;
 
 seleccion:
-        SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C SINO LLAVE_A bloque LLAVE_C {printf("	si (condicion) {bloque} sino {bloque} es Seleccion\n");}
-        | SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("	si (condicion) {bloque} es Seleccion\n");}
+        SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C SINO LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C SINO LLAVE_A <Bloque> LLAVE_C\n\n");}
+        | SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C\n\n");}
         ;
 
 condicion:
