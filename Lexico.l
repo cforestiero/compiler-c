@@ -14,6 +14,7 @@ int yyerror(void);
 
 %option noyywrap  
 %option yylineno 
+
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
@@ -23,8 +24,6 @@ CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
 
-INI_COMENTARIO  "*-"
-FIN_COMENTARIO  "-*"
 OP_ASIG   		":="
 OP_SUM          "+"
 OP_RES          "-"
