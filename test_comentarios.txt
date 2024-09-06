@@ -1,0 +1,9 @@
+"*-.".*[^*-]          { 
+                    printf("\nERROR LEXICO: No se admiten gjnsdfkjgnsdfjkgnsk anidados: %s\n", yytext);
+                    exit(1);
+                }
+\*-[^\*]*\*-.*         { 
+                    printf("\nERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
+                    exit(1);
+                }   
+"*-".*"-*"        { printf("\nComentario: %s\n", yytext); }

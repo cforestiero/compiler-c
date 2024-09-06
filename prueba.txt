@@ -1,7 +1,17 @@
+
 init
 {
 a : Int
 }
 
+
+
 y := triangulo(x, 1+1, x)
 y := binaryCount([0b110,0b1,0,5,x,0b10101100,-1])
+
+*- HOLa soy un comentario simple -*
+
+*- Este comentario contiene un delimitador *- dentro -* 
+
+*- Holis soy *-malo-*jujuju-*
+

@@ -10,12 +10,10 @@ char *yyltext;
 
 int yyerror(void);
 
-
 %}
 
 %option noyywrap  
 %option yylineno 
-
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
@@ -25,7 +23,8 @@ CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
 
-
+INI_COMENTARIO  "*-"
+FIN_COMENTARIO  "-*"
 OP_ASIG   		":="
 OP_SUM          "+"
 OP_RES          "-"
@@ -46,10 +45,17 @@ COMP_MENORIGUAL "<="
 COMP_MAYORIGUAL ">="
 COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
-COMENTARIO      "*-".*"-*"
 
 %%
 
+\*-[^\*]*\*-.*  { 
+                    printf("\nERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
+                    exit(1);
+                }   
+
+"*-".*"-*"        { printf("\nComentario: %s\n", yytext); }
+
+                    
 "binaryCount"   {printf("\nBinaryCount: %s\n", yytext);return BINARYCOUNT;}
 "triangulo"     {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
 "mientras"      {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
@@ -64,7 +70,6 @@ COMENTARIO      "*-".*"-*"
 "OR"            {printf("\nOr: %s\n", yytext);return OR;}
 "NOT"           {printf("\nNot: %s\n", yytext);return NOT;}
 "init"          {printf("\nInit: %s\n", yytext);return INIT;}
-
 
 
 {ID}            {printf("\nIdentificador: %s\n", yytext);return ID;}
@@ -118,8 +123,6 @@ COMP_DISTINTO   {printf("\nDistinto: %s\n", yytext);return COMP_DISTINTO;}
                     printf("\nConstanteCadena: %s\n", yytext);   
                     return CTE_CADENA; 
                 }
-
-{COMENTARIO}    {printf("\nComentario: %s\n", yytext);}
 
 "\n"      		
 "\t"
