@@ -52,7 +52,7 @@ COMP_DISTINTO   "!="
                     exit(1);
                 }   
 
-"*-".*"-*"        { printf("\nComentario: %s\n", yytext); }
+"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
 
                     
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
@@ -86,10 +86,10 @@ COMP_DISTINTO   "!="
 {COMA}          {printf("El analizador lexico reconoce a: %s como Coma\n", yytext); return COMA;}
 {PUNTO}         {printf("El analizador lexico reconoce a: %s como Punto\n", yytext); return PUNTO;}
 {DOS_PUNTOS}    {printf("El analizador lexico reconoce a: %s como Dos Puntos\n", yytext); return DOS_PUNTOS;}
-COMP_MENORIGUAL {printf("El analizador lexico reconoce a: %s como Menor Igual\n", yytext); return COMP_MENORIGUAL;}
-COMP_MAYORIGUAL {printf("El analizador lexico reconoce a: %s como Mayor Igual\n", yytext); return COMP_MAYORIGUAL;}
-COMP_IGUAL      {printf("El analizador lexico reconoce a: %s como Igual\n", yytext); return COMP_IGUAL;}
-COMP_DISTINTO   {printf("El analizador lexico reconoce a: %s como Distinto\n", yytext); return COMP_DISTINTO;}
+{COMP_MENORIGUAL} {printf("El analizador lexico reconoce a: %s como Menor Igual\n", yytext); return COMP_MENORIGUAL;}
+{COMP_MAYORIGUAL} {printf("El analizador lexico reconoce a: %s como Mayor Igual\n", yytext); return COMP_MAYORIGUAL;}
+{COMP_IGUAL}      {printf("El analizador lexico reconoce a: %s como Igual\n", yytext); return COMP_IGUAL;}
+{COMP_DISTINTO}   {printf("El analizador lexico reconoce a: %s como Distinto\n", yytext); return COMP_DISTINTO;}
 {COMP_MAYOR}    {printf("El analizador lexico reconoce a: %s como Mayor\n", yytext); return COMP_MAYOR;}
 {COMP_MENOR}    {printf("El analizador lexico reconoce a: %s como Menor\n", yytext); return COMP_MENOR;}
 
@@ -130,6 +130,7 @@ COMP_DISTINTO   {printf("El analizador lexico reconoce a: %s como Distinto\n", y
                     printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
                     return CTE_REAL; 
                 }
+
 {CTE_CADENA}    {     
                     if (strlen(yytext) - 2 > 40) 
                     {          

@@ -1,8 +1,39 @@
-init
+init 
 {
-a : Int
+    int1, int2, int3, int4 : Int
+    float1, float2, float3: Float
+    string1: String
 }
 
-a := 2 - -4
+int1 := 1
+int2 := 2
+int3 := 3
+float1 := 1.5
+float2 := 1.5
+string1 := "Soy una cadena"
 
+*- Testeamos operaciones aritmeticas -*
+int1 := 2 + 4
+int2 := a1 - 1
+int3 := -1--3
+int4 := int3 * -1
+float3 := float1 / float2
 
+leer(texto)
+escribir(string1)
+escribir("string1")
+
+si (int1 > int2 AND int3 > int4)
+{
+    escribir("Paso el if")
+}
+
+si (a > b OR c > b)
+{
+    escribir("Paso otra vez")
+}
+
+si (NOT a > b)
+{
+    escribir("a no es mas grande que b")
+}

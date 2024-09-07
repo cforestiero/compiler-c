@@ -100,6 +100,7 @@ asignacion:
         ID OP_ASIG expresion {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");}
         | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG TRIANGULO\n");}
         | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG BINARYCOUNT\n");}
+        | ID OP_ASIG CTE_CADENA {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");}
         ;
 
 seleccion:

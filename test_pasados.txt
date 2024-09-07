@@ -1,0 +1,12 @@
+bloque init 
+declaracion de lista de variables con todos los tipos de datos
+asignaciones con todos los tipos de datos
+operaciones aritmeticas con todos los tipos de datos
+leer variables (no me convence el print del sintactico)
+escribir variables (no me convence el print del sintactico)
+escribir cadenas de texto (no me convence el print del sintactico)
+AND, OR, NOT
+
+
+
+ 
