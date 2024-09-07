@@ -51,6 +51,7 @@ int yylex();
 %token NOT
 %token INIT
 
+%left OP_SUMA OP_RESTA
 
 %%
 
@@ -150,10 +151,12 @@ entrada:
         ;
 
 expresion:
-        termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Termino>\n\n");}
-	      |expresion OP_SUM termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
-	      |expresion OP_RES termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> P_RES <Termino>\n\n");}
-	      ;
+      termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Termino>\n\n");}
+    | expresion OP_SUM termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
+    | expresion OP_RES termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_RES <Termino>\n\n");}
+    | OP_SUM expresion %prec OP_SUMA { printf("                El analizador sintactico reconoce: <Expresion> --> OP_SUMA <Expresion>\n\n"); $$ = +$2; }
+    | OP_RESTA expresion %prec OP_RESTA { printf("                El analizador sintactico reconoce: <Expresion> --> OP_RESTA <Expresion>\n\n"); $$ = -$2; }
+    ;
 
 termino: 
        factor {printf("                El analizador sintactico reconoce: <Termino> --> <Factor>\n\n");}
