@@ -1,13 +1,10 @@
-
 init
 {
 a : Int
 }
 
-
-
 y := triangulo(x, 1+1, x)
-y := binaryCount([0b110,0b1,0,5,x,0b10101100,-1])
+y := binaryCount([0b1111111111111111111111000001111110,0b1,0,5,x,0b10101100,-1])
 
 *- HOLa soy un comentario simple -*
 

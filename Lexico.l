@@ -48,11 +48,11 @@ COMP_DISTINTO   "!="
 %%
 
 \*-[^\*]*\*-.*  { 
-                    printf("ERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
+                    printf("\nERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
                     exit(1);
                 }   
 
-"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
+"*-".*"-*"        { printf("\nComentario: %s\n", yytext); }
 
                     
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
@@ -93,7 +93,23 @@ COMP_DISTINTO   {printf("El analizador lexico reconoce a: %s como Distinto\n", y
 {COMP_MAYOR}    {printf("El analizador lexico reconoce a: %s como Mayor\n", yytext); return COMP_MAYOR;}
 {COMP_MENOR}    {printf("El analizador lexico reconoce a: %s como Menor\n", yytext); return COMP_MENOR;}
 
-{CTE_BINARIA}   {printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); return CTE_BINARIA;}
+{CTE_BINARIA}   {
+                    long valor = strtol(yytext + 2, NULL, 2);
+                    int length = strlen(yytext) - 2;
+
+                    
+                    if (length == 16 && yytext[2] == '1') {  
+                        valor -= (1L << 16); 
+                    }
+
+                    if (valor < -32768 || valor > 65535) {
+                        printf("\nERROR LEXICO: Constante binaria %s fuera de rango para un Int de 16 bits.\n", yytext);
+                        exit(1);
+                    }
+
+                    printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); return CTE_BINARIA;
+                }
+
 {CTE_ENTERA}    {
                     long valor = strtol(yytext, NULL, 10); 
                     if (valor < -32768 || valor > 65535)
