@@ -25,6 +25,7 @@ CTE_REAL        -?({DIGITO}*\.{DIGITO}+|{DIGITO}+\.{DIGITO}*)
 CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
+INICIO_COMENTARIO "-*"
 
 OP_ASIG   		":="
 OP_SUM          "+"
@@ -48,13 +49,6 @@ COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
 %%
-
-\*-[^\*]*\*-.*  { 
-                    printf("\nERROR LEXICO: No se admiten comentarios anidados: %s\n", yytext);
-                    exit(1);
-                }   
-
-"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
 
                     
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
@@ -141,12 +135,8 @@ COMP_DISTINTO   "!="
                         exit(1);   
                     }    
                     printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
-
                     agregarSimbolo(yytext,"",yytext,"");
-
                     return CTE_REAL; 
-
-                    
                 }
 
 {CTE_CADENA}    {     
@@ -155,13 +145,11 @@ COMP_DISTINTO   "!="
                         printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
                     }       
                     printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
-
                     char longitud[10];
-                    agregarSimbolo(yytext,"",yytext, itoa(strlen(yytext)-2, longitud,10));  
+                    itoa(strlen(yytext)-2, longitud,10);
 
+                    agregarSimbolo(yytext,"",yytext, longitud);  
                     return CTE_CADENA; 
-
-                    
                 }
 
 "\n"      		

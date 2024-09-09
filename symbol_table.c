@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "simbolo_table.h"
+#include "symbol_table.h"
 #include "Lista.h"
 
 
@@ -47,7 +47,7 @@ void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitu
 }
 
 void guardarTablaDeSimbolos(const char *filename) {
-    FILE *file = fopen(filenombre, "w");
+    FILE *file = fopen(filename, "w");
 
     if (file == NULL) 
     {
@@ -63,7 +63,7 @@ void guardarTablaDeSimbolos(const char *filename) {
         simbolo* _simbolo = (simbolo*)current->dato; // Obtener el símbolo desde el nodo
 
         // Escribir los datos del símbolo en el archivo
-        fprintf(file, "%-40s | %-20s | %-40s | %-10d\n", 
+        fprintf(file, "%-40s | %-20s | %-40s | %-10s\n", 
                 _simbolo->nombre, 
                 _simbolo->tipo_de_dato, 
                 _simbolo->valor, 
@@ -72,7 +72,6 @@ void guardarTablaDeSimbolos(const char *filename) {
         // Avanzar al siguiente nodo
         current = current->sig;
     }
-    
 
     fclose(file);
     printf("Tabla de simbolos guardada en %s\n", filename);

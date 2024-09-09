@@ -1,7 +1,6 @@
 #include <memory.h>
 #include <stdlib.h>
 
-#include "ListaImplDinamica.h"
 #include "Lista.h"
 
 ///principales

@@ -2,7 +2,6 @@
 #define LISTA_H_INCLUDED
 
 #include <stddef.h>
-#include "ListaImplDinamica.h"
 
 #define MIN(x,y) (x<y)? (x) : (y)
 
