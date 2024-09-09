@@ -1,7 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "y.tab.h"
+#include "Lista.h"
+#include "symbol_table.h"
+
 int yystopparser=0;
 FILE  *yyin;
 
@@ -52,11 +56,13 @@ int yylex();
 %token INIT
 
 %left OP_SUMA OP_RESTA
+%left COMP_MAYOR COMP_MENOR COMP_MAYORIGUAL COMP_MENORIGUAL COMP_IGUAL COMP_DISTINTO
 
 %%
 
 programa:
-        init bloque {printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");}
+        init bloque {printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
+                        save_symbol_table("symbol-table.txt");}
         ;
 
 bloque:

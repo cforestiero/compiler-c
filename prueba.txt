@@ -37,3 +37,5 @@ si (NOT a > b)
 {
     escribir("a no es mas grande que b")
 }
+
+y := triangulo(x, 1+1, x)

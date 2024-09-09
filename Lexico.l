@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "y.tab.h"
+#include "Lista.h"
+#include "symbol_table.h"
 
 FILE  *yyin;
 int yylval;
@@ -71,7 +73,9 @@ COMP_DISTINTO   "!="
 "init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); return INIT;}
 
 
-{ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); return ID;}
+{ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
+                add_symbol(yytext,"ID",NULL,0);return ID;
+                }
 {OP_ASIG}       {printf("El analizador lexico reconoce a: %s como Asignacion\n", yytext); return OP_ASIG;}
 {OP_SUM}        {printf("El analizador lexico reconoce a: %s como Suma\n", yytext); return OP_SUM;}
 {OP_MUL}        {printf("El analizador lexico reconoce a: %s como Multiplicacion\n", yytext); return OP_MUL;}
@@ -107,7 +111,11 @@ COMP_DISTINTO   "!="
                         exit(1);
                     }
 
-                    printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); return CTE_BINARIA;
+                    printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
+                    
+                    add_symbol(yytext,"-",yytext,0);
+
+                    return CTE_BINARIA;
                 }
 
 {CTE_ENTERA}    {
@@ -118,7 +126,9 @@ COMP_DISTINTO   "!="
                         exit(1);
                     }
                     printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
+                    add_symbol(yytext,"-",yytext,0);
                     return CTE_ENTERA;
+
                 }
 {CTE_REAL}      {     
                     double valor = strtod(yytext, NULL); 
@@ -128,7 +138,10 @@ COMP_DISTINTO   "!="
                         exit(1);   
                     }    
                     printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
+                    add_symbol(yytext,"-",yytext,0);
                     return CTE_REAL; 
+
+                    
                 }
 
 {CTE_CADENA}    {     
@@ -136,8 +149,11 @@ COMP_DISTINTO   "!="
                     {          
                         printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
                     }       
-                    printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext);   
+                    printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
+                    add_symbol(yytext,"-",yytext,strlen(yytext)-2);  
                     return CTE_CADENA; 
+
+                    
                 }
 
 "\n"      		

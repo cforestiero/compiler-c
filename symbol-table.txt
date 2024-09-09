@@ -1,0 +1,29 @@
+NOMBRE                                   | TIPO DATO            | VALOR                                    | LONGITUD  
+-----------------------------------------------------------------------------------------------------------------------------------
+"Paso el if"                             | -                    | "Paso el if"                             | 10        
+"Paso otra vez"                          | -                    | "Paso otra vez"                          | 13        
+"Soy una cadena"                         | -                    | "Soy una cadena"                         | 14        
+"a no es mas grande que b"               | -                    | "a no es mas grande que b"               | 24        
+"string1"                                | -                    | "string1"                                | 7         
+-1                                       | -                    | -1                                       | 0         
+-3                                       | -                    | -3                                       | 0         
+1                                        | -                    | 1                                        | 0         
+1.5                                      | -                    | 1.5                                      | 0         
+2                                        | -                    | 2                                        | 0         
+3                                        | -                    | 3                                        | 0         
+4                                        | -                    | 4                                        | 0         
+a                                        | ID                   | —                                      | 0         
+a1                                       | ID                   | —                                      | 0         
+b                                        | ID                   | —                                      | 0         
+c                                        | ID                   | —                                      | 0         
+float1                                   | ID                   | —                                      | 0         
+float2                                   | ID                   | —                                      | 0         
+float3                                   | ID                   | —                                      | 0         
+int1                                     | ID                   | —                                      | 0         
+int2                                     | ID                   | —                                      | 0         
+int3                                     | ID                   | —                                      | 0         
+int4                                     | ID                   | —                                      | 0         
+string1                                  | ID                   | —                                      | 0         
+texto                                    | ID                   | —                                      | 0         
+x                                        | ID                   | —                                      | 0         
+y                                        | ID                   | —                                      | 0         
