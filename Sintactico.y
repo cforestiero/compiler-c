@@ -12,6 +12,7 @@ FILE  *yyin;
 int yyerror();
 int yylex();
 
+char* nombre_archivo = "symbol-table.txt";
 
 %}
 
@@ -55,14 +56,15 @@ int yylex();
 %token NOT
 %token INIT
 
-%left OP_SUMA OP_RESTA
-%left COMP_MAYOR COMP_MENOR COMP_MAYORIGUAL COMP_MENORIGUAL COMP_IGUAL COMP_DISTINTO
+%left '+''-'
+%left '*''/'
+%right MENOS_UNARIO
 
 %%
 
 programa:
         init bloque {printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
-                        save_symbol_table("symbol-table.txt");}
+                        save_symbol_table(nombre_archivo);}
         ;
 
 bloque:
@@ -95,17 +97,17 @@ tipo_de_dato:
         ;
 
 sentencia:
-        asignacion {printf("                El analizador sintactico reconoce: <Sentencia> --> OP_ASIG\n\n");}
-        | iteracion {printf("                El analizador sintactico reconoce: <Sentencia> --> MIENTRAS\n\n");}
-        | seleccion {printf("                El analizador sintactico reconoce: <Sentencia> --> SI\n\n");}                     
-        | escritura {printf("                El analizador sintactico reconoce: <Sentencia> --> ESCRIBIR\n\n");}
-        | lectura {printf("                El analizador sintactico reconoce: <Sentencia> --> LEER\n\n");}
+        asignacion {printf("                El analizador sintactico reconoce: <Sentencia> --> <asignacion>\n\n");}
+        | iteracion {printf("                El analizador sintactico reconoce: <Sentencia> --> <iteracion>\n\n");}
+        | seleccion {printf("                El analizador sintactico reconoce: <Sentencia> --> <seleccion>\n\n");}                     
+        | escritura {printf("                El analizador sintactico reconoce: <Sentencia> --> <escritura>\n\n");}
+        | lectura {printf("                El analizador sintactico reconoce: <Sentencia> --> <lectura>\n\n");}
         ;
 
 asignacion:
         ID OP_ASIG expresion {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");}
-        | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG TRIANGULO\n");}
-        | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG BINARYCOUNT\n");}
+        | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}
+        | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");}
         | ID OP_ASIG CTE_CADENA {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");}
         ;
 
@@ -115,10 +117,10 @@ seleccion:
         ;
 
 condicion:
-        comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion>\n\n");}
-        | comparacion AND comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion> AND <Condicion>\n\n");}
-        | comparacion OR comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Condicion> OR <Condicion>\n\n");}
-        | NOT comparacion {printf("                El analizador sintactico reconoce: <Comparacion> --> NOT <Condicion>\n\n");}
+        comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion>\n\n");}
+        | comparacion AND comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> AND <Comparacion>\n\n");}
+        | comparacion OR comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> OR <Comparacion>\n\n");}
+        | NOT comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> NOT <Comparacion>\n\n");}
         ;
 
 comparacion:
@@ -161,8 +163,6 @@ expresion:
       termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Termino>\n\n");}
     | expresion OP_SUM termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
     | expresion OP_RES termino {printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_RES <Termino>\n\n");}
-    | OP_SUM expresion %prec OP_SUMA { printf("                El analizador sintactico reconoce: <Expresion> --> OP_SUMA <Expresion>\n\n"); $$ = +$2; }
-    | OP_RESTA expresion %prec OP_RESTA { printf("                El analizador sintactico reconoce: <Expresion> --> OP_RESTA <Expresion>\n\n"); $$ = -$2; }
     ;
 
 termino: 
@@ -176,7 +176,9 @@ factor:
       | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");}
       | CTE_REAL {printf("                El analizador sintactico reconoce: <Factor> --> CTE_REAL\n\n");}
       | PAR_A expresion PAR_C {printf("                El analizador sintactico reconoce: <Factor> --> PAR_A <Expresion> PAR_C\n\n");}
-     	;
+      |OP_RES PAR_A expresion PAR_C %prec MENOS_UNARIO {printf("                El analizador sintactico reconoce: <Factor> --> -(<Expresion>)\n\n");}
+      |OP_RES ID %prec MENOS_UNARIO {printf("                El analizador sintactico reconoce: <Factor> --> - ID\n\n");}
+      ;
 
 funcion_triangulo:
       TRIANGULO PAR_A lista_parametros PAR_C {printf("                El analizador sintactico reconoce: <Funcion_triangulo> --> TRIANGULO PAR_A <Lista_parametros> PAR_C\n\n");}
