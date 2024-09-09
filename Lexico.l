@@ -74,7 +74,8 @@ COMP_DISTINTO   "!="
 
 
 {ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
-                add_symbol(yytext,"ID",NULL,0);return ID;
+                agregarSimbolo(yytext,"","","");
+                return ID;
                 }
 {OP_ASIG}       {printf("El analizador lexico reconoce a: %s como Asignacion\n", yytext); return OP_ASIG;}
 {OP_SUM}        {printf("El analizador lexico reconoce a: %s como Suma\n", yytext); return OP_SUM;}
@@ -113,7 +114,7 @@ COMP_DISTINTO   "!="
 
                     printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                     
-                    add_symbol(yytext,"-",yytext,0);
+                    agregarSimbolo(yytext,"",yytext,"");
 
                     return CTE_BINARIA;
                 }
@@ -126,7 +127,9 @@ COMP_DISTINTO   "!="
                         exit(1);
                     }
                     printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
-                    add_symbol(yytext,"-",yytext,0);
+
+                    agregarSimbolo(yytext,"",yytext,"");
+
                     return CTE_ENTERA;
 
                 }
@@ -138,7 +141,9 @@ COMP_DISTINTO   "!="
                         exit(1);   
                     }    
                     printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
-                    add_symbol(yytext,"-",yytext,0);
+
+                    agregarSimbolo(yytext,"",yytext,"");
+
                     return CTE_REAL; 
 
                     
@@ -150,7 +155,10 @@ COMP_DISTINTO   "!="
                         printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
                     }       
                     printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
-                    add_symbol(yytext,"-",yytext,strlen(yytext)-2);  
+
+                    char longitud[10];
+                    agregarSimbolo(yytext,"",yytext, itoa(strlen(yytext)-2, longitud,10));  
+
                     return CTE_CADENA; 
 
                     

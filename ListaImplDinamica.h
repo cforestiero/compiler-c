@@ -1,8 +1,0 @@
-#ifndef LISTAIMPLDINAMICA_H_INCLUDED
-#define LISTAIMPLDINAMICA_H_INCLUDED
-
-#include "Nodo.h"
-
-typedef Nodo* Lista;
-
-#endif // LISTAIMPLDINAMICA_H_INCLUDED

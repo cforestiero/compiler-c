@@ -64,7 +64,7 @@ char* nombre_archivo = "symbol-table.txt";
 
 programa:
         init bloque {printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
-                        save_symbol_table(nombre_archivo);}
+                        guardarTablaDeSimbolos(nombre_archivo);}
         ;
 
 bloque:

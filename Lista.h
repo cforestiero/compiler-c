@@ -10,6 +10,15 @@
 #define DUPLICADO 1
 #define SIN_MEMORIA 2
 
+typedef struct sNodo
+{
+    void* dato;
+    size_t tam;
+    struct sNodo* sig;
+} Nodo;
+
+typedef Nodo* Lista;
+
 typedef int (*Cmp)(const void* e1, const void* e2);
 typedef void (*Actualizar)(void* actualizado, const void* actualizador);
 typedef int (*Condicion)(const void* e);
