@@ -12,7 +12,7 @@ char *yyltext;
 
 
 int yyerror(void);
-
+int nested_comments = 0;
 %}
 
 %option noyywrap  
@@ -27,7 +27,6 @@ CTE_REAL        -?({DIGITO}*\.{DIGITO}+|{DIGITO}+\.{DIGITO}*)
 CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
-
 
 OP_ASIG   		":="
 OP_SUM          "+"
@@ -50,15 +49,36 @@ COMP_MAYORIGUAL ">="
 COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
+%x COMMENT
+
 %%
 
-\*-[^\*]*\*-.*  { 
-                    printf("\nERROR LEXICO: tipo de comentario no admitido: %s\n", yytext);
-                    exit(1);
-                }   
+\*\- {
+    nested_comments = 1;  // Iniciamos el contador de comentarios anidados
+    BEGIN(COMMENT);       // Cambiamos al estado COMMENT
+}
 
-"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
+<COMMENT>{
+    /* Encontramos otro comentario anidado, incrementamos el contador */
+    \*\- {
+        nested_comments++;
+    }
+    
+    /* Cierre de comentario, decrementamos el contador */
+    \-\* {
+        nested_comments--;
+        if (nested_comments == 0) {
+            BEGIN(INITIAL);  // Regresamos al estado inicial
+            // printf("Comentario válido encontrado\n");
+        }
+    }
 
+    /* Consumimos todo lo demás dentro del comentario anidado */
+    [^\*\-]+   ;  // Ignoramos caracteres que no sean * o -
+    \* | \-    ;  // Ignoramos caracteres * o - individuales
+
+    return NULL;
+}
                     
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
 "triangulo"     {printf("El analizador lexico reconoce a: %s como Triangulo\n", yytext); return TRIANGULO;}
