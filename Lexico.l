@@ -10,12 +10,14 @@ FILE  *yyin;
 int yylval;
 char *yyltext;
 
+
 int yyerror(void);
 
 %}
 
 %option noyywrap  
 %option yylineno 
+
 
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
@@ -25,7 +27,7 @@ CTE_REAL        -?({DIGITO}*\.{DIGITO}+|{DIGITO}+\.{DIGITO}*)
 CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
-INICIO_COMENTARIO "-*"
+
 
 OP_ASIG   		":="
 OP_SUM          "+"
@@ -49,6 +51,13 @@ COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
 %%
+
+\*-[^\*]*\*-.*  { 
+                    printf("\nERROR LEXICO: tipo de comentario no admitido: %s\n", yytext);
+                    exit(1);
+                }   
+
+"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
 
                     
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
@@ -95,22 +104,16 @@ COMP_DISTINTO   "!="
 {CTE_BINARIA}   {
                     long valor = strtol(yytext + 2, NULL, 2);
                     int length = strlen(yytext) - 2;
-
-                    
                     if (length == 16 && yytext[2] == '1') {  
                         valor -= (1L << 16); 
                     }
-
                     if (valor < -32768 || valor > 65535) {
                         printf("\nERROR LEXICO: Constante binaria %s fuera de rango para un Int de 16 bits.\n", yytext);
-                        exit(1);
+                    }else{
+                        printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
+                        agregarSimbolo(yytext,"",yytext,"");
+                        return CTE_BINARIA;
                     }
-
-                    printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
-                    
-                    agregarSimbolo(yytext,"",yytext,"");
-
-                    return CTE_BINARIA;
                 }
 
 {CTE_ENTERA}    {
@@ -118,38 +121,37 @@ COMP_DISTINTO   "!="
                     if (valor < -32768 || valor > 65535)
                     {
                         printf("ERROR LEXICO: Constante %s fuera de rango para un Int de 16 bits.\n", yytext);
-                        exit(1);
+                        
+                    }else{
+                        printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
+                        agregarSimbolo(yytext,"",yytext,"");
+                        return CTE_ENTERA;
                     }
-                    printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
-
-                    agregarSimbolo(yytext,"",yytext,"");
-
-                    return CTE_ENTERA;
-
                 }
+
 {CTE_REAL}      {     
                     double valor = strtod(yytext, NULL); 
                     if (valor < -3.402823e+38 || valor > 3.402823e+38) 
                     {         
                         printf("ERROR LEXICO: Constante %f fuera de rango para un Float de 32 bits.\n", valor);  
-                        exit(1);   
+                    }else{
+                        printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
+                        agregarSimbolo(yytext,"",yytext,"");
+                        return CTE_REAL; 
                     }    
-                    printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
-                    agregarSimbolo(yytext,"",yytext,"");
-                    return CTE_REAL; 
                 }
 
 {CTE_CADENA}    {     
                     if (strlen(yytext) - 2 > 40) 
                     {          
                         printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
+                    }else{
+                        printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
+                        char longitud[10];
+                        itoa(strlen(yytext)-2, longitud,10);
+                        agregarSimbolo(yytext,"",yytext, longitud);  
+                        return CTE_CADENA; 
                     }       
-                    printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
-                    char longitud[10];
-                    itoa(strlen(yytext)-2, longitud,10);
-
-                    agregarSimbolo(yytext,"",yytext, longitud);  
-                    return CTE_CADENA; 
                 }
 
 "\n"      		

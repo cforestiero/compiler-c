@@ -11,7 +11,7 @@ float2 := .5
 string1 := "Soy una cadena"
 
 *- Verificacion de cotas para un entero de 16 bits-*
-int2 := -65535
+int2 := -32768
 int3 := 65535
 
 
