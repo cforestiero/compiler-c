@@ -3,7 +3,6 @@
 #include "symbol_table.h"
 #include "Lista.h"
 
-
 Lista lista_simbolos;
 int lista_inicializada = 0;
 
@@ -23,10 +22,7 @@ void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitu
         printf("ERROR LEXICO: El nombre, tipo de dato, valor o longitud del simbolo no existe.\n");
         return;
     }
-    
-    
     // usamos strncpy para evitar overflow de buffer, y forzamos que el último carácter sea \0 para asegurarnos de que las cadenas están correctamente terminadas.    
-
     simbolo nuevo_simbolo;
 
     strncpy(nuevo_simbolo.nombre, nombre, sizeof(nuevo_simbolo.nombre) - 1);
@@ -40,10 +36,8 @@ void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitu
     
     strncpy(nuevo_simbolo.longitud, longitud, sizeof(nuevo_simbolo.longitud) - 1);
     nuevo_simbolo.longitud[sizeof(nuevo_simbolo.longitud) - 1] = '\0'; 
-
     // Insertar el nuevo símbolo en la lista
-    insertarListaOrdSinDupli(&lista_simbolos, &nuevo_simbolo, sizeof(nuevo_simbolo),compa);
-    
+    insertarListaOrdSinDupli(&lista_simbolos, &nuevo_simbolo, sizeof(nuevo_simbolo),compa); 
 }
 
 void guardarTablaDeSimbolos(const char *filename) {
@@ -55,15 +49,15 @@ void guardarTablaDeSimbolos(const char *filename) {
         return;
     }
 
-    fprintf(file, "%-40s | %-20s | %-40s | %-10s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
-    fprintf(file, "-----------------------------------------------------------------------------------------------------------------------------------\n");
+    fprintf(file, "%-50s | %-25s | %-45s | %-10s\n", "NOMBRE", "TIPODATO", "VALOR", "LONGITUD");
+    fprintf(file, "--------------------------------------------------------------------------------------------------------------------------------------------\n");
     Nodo* current = lista_simbolos;
 
     while (current != NULL) {
         simbolo* _simbolo = (simbolo*)current->dato; // Obtener el símbolo desde el nodo
 
         // Escribir los datos del símbolo en el archivo
-        fprintf(file, "%-40s | %-20s | %-40s | %-10s\n", 
+        fprintf(file, "%-50s | %-25s | %-45s | %-10s\n", 
                 _simbolo->nombre, 
                 _simbolo->tipo_de_dato, 
                 _simbolo->valor, 
@@ -75,7 +69,6 @@ void guardarTablaDeSimbolos(const char *filename) {
 
     fclose(file);
     printf("Tabla de simbolos guardada en %s\n", filename);
-
 }
 
 int compa(const void *e1, const void *e2) {

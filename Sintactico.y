@@ -206,7 +206,6 @@ elemento:
 
 %%
 
-
 int main(int argc, char *argv[])
 {
     if((yyin = fopen(argv[1], "rt"))==NULL)
@@ -228,6 +227,6 @@ int main(int argc, char *argv[])
 int yyerror(void)
 {
     printf("Error Sintactico\n");
-	  exit (1);
+    exit(1);
 }
 
