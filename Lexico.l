@@ -12,12 +12,11 @@ char *yyltext;
 
 
 int yyerror(void);
-int comentarios_anidados = 0;
+
 %}
 
 %option noyywrap  
 %option yylineno 
-
 
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
@@ -27,8 +26,6 @@ CTE_REAL        -?({DIGITO}*\.{DIGITO}+|{DIGITO}+\.{DIGITO}*)
 CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
-COMMENT         "*-"|"-*"  
-
 
 OP_ASIG   		":="
 OP_SUM          "+"
@@ -52,7 +49,48 @@ COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
 %%
-                  
+
+"*-"            {
+                    comentarios_anidados++;
+                    BEGIN(COMENTARIO);
+                }
+
+<COMENTARIO>  {  
+                    "*-"   { 
+                            comentarios_anidados++;
+                            if(comentarios_anidados > 2) {
+                                printf("\nERROR LEXICO: Comentario anidado de mas de un nivel.\n");
+                            }
+                            
+                        }
+
+                    "-*"   { 
+                            comentarios_anidados--;
+                            if(comentarios_anidados == 0){
+                                printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext);
+                                BEGIN(INITIAL);
+                            }
+
+                            else if(comentarios_anidados < 0 ){
+                                printf("\nERROR LEXICO: Cerró comentario que no fue abierto.\n");
+                                BEGIN(INITIAL);
+                            }
+                        }
+                    .      { 
+                            /* Ignora cualquier otro carácter dentro de los comentarios */
+                        }
+                    [\n]   { 
+                            yylineno++;
+                        }
+                }
+
+<<EOF>> {
+    if (comentarios_anidados > 0) {
+        fprintf(stderr, "ERROR LEXICO: Fin de archivo inesperado dentro de un comentario anidado.\n");
+        exit(1);
+    }
+}
+
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
 "triangulo"     {printf("El analizador lexico reconoce a: %s como Triangulo\n", yytext); return TRIANGULO;}
 "mientras"      {printf("El analizador lexico reconoce a: %s como Mientras\n", yytext); return MIENTRAS;}
@@ -146,28 +184,6 @@ COMP_DISTINTO   "!="
                         return CTE_CADENA; 
                     }       
                 }
-
-{COMMENT}   {
-                if (strcmp(yytext, "*-") == 0) {
-                    comentarios_anidados++;
-                } else if (strcmp(yytext, "-*") == 0) {
-                    comentarios_anidados--;
-                }
-                
-                if(comentarios_anidados < 0 ){
-                    printf("\nERROR LEXICO: Cerro comentario que no fue abierto.\n");
-                }
-                    
-                else if(comentarios_anidados > 2) {
-                    printf("\nERROR LEXICO: Comentario anidado de mas de un nivel.\n");
-                }
-                
-
-
-                else if(strcmp(yytext, "-*") == 0 && comentarios_anidados == 0){
-                    printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext);
-                }
-}
 
 "\n"      		
 "\t"
