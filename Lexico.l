@@ -6,18 +6,19 @@
 #include "Lista.h"
 #include "symbol_table.h"
 
+#define MAX_NESTED_LEVEL 1
+
 FILE  *yyin;
 int yylval;
 char *yyltext;
-
-
 int yyerror(void);
-int comentarios_anidados = 0;
+int nested_level = 0;
+
 %}
 
 %option noyywrap  
 %option yylineno 
-
+%x NESTED_COMMENT
 
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
@@ -27,7 +28,6 @@ CTE_REAL        -?({DIGITO}*\.{DIGITO}+|{DIGITO}+\.{DIGITO}*)
 CTE_CADENA      \"[^\"]*\"
 CTE_BINARIA     "0b"(0|1)+
 ID			    {LETRA}({LETRA}|{DIGITO})*
-COMMENT         "*-"|"-*"  
 
 
 OP_ASIG   		":="
@@ -52,7 +52,14 @@ COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
 %%
-                  
+\*-[^\*]*\*-.*  { 
+                    printf("\nERROR LEXICO: tipo de comentario no admitido: %s\n", yytext);
+                    exit(1);
+                }   
+
+"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
+ 
+                    
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
 "triangulo"     {printf("El analizador lexico reconoce a: %s como Triangulo\n", yytext); return TRIANGULO;}
 "mientras"      {printf("El analizador lexico reconoce a: %s como Mientras\n", yytext); return MIENTRAS;}
@@ -67,7 +74,6 @@ COMP_DISTINTO   "!="
 "OR"            {printf("El analizador lexico reconoce a: %s como Or\n", yytext); return OR;}
 "NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
 "init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); return INIT;}
-
 
 {ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
                 agregarSimbolo(yytext,"","","");
@@ -146,28 +152,6 @@ COMP_DISTINTO   "!="
                         return CTE_CADENA; 
                     }       
                 }
-
-{COMMENT}   {
-                if (strcmp(yytext, "*-") == 0) {
-                    comentarios_anidados++;
-                } else if (strcmp(yytext, "-*") == 0) {
-                    comentarios_anidados--;
-                }
-                
-                if(comentarios_anidados < 0 ){
-                    printf("\nERROR LEXICO: Cerro comentario que no fue abierto.\n");
-                }
-                    
-                else if(comentarios_anidados > 2) {
-                    printf("\nERROR LEXICO: Comentario anidado de mas de un nivel.\n");
-                }
-                
-
-
-                else if(strcmp(yytext, "-*") == 0 && comentarios_anidados == 0){
-                    printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext);
-                }
-}
 
 "\n"      		
 "\t"
