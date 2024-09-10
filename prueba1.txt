@@ -1,0 +1,7 @@
+init 
+{
+    string1: String
+}
+*-Soy un comentario buenito-*
+*-Soy un comentario *- anidado -* de *-un-* nivel-*
+*-Soy un comentario *- anidado *- de dos -* niveles-*

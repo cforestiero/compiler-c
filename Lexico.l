@@ -6,11 +6,11 @@
 #include "Lista.h"
 #include "symbol_table.h"
 
+#define MAX_NESTED_LEVEL 1
+
 FILE  *yyin;
 int yylval;
 char *yyltext;
-
-
 int yyerror(void);
 
 %}
@@ -106,7 +106,6 @@ COMP_DISTINTO   "!="
 "NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
 "init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); return INIT;}
 
-
 {ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
                 agregarSimbolo(yytext,"","","");
                 return ID;
@@ -182,6 +181,8 @@ COMP_DISTINTO   "!="
                         itoa(strlen(yytext)-2, longitud,10);
                         agregarSimbolo(yytext,"",yytext, longitud);  
                         return CTE_CADENA; 
+                    }       
+                }
                     }       
                 }
 
