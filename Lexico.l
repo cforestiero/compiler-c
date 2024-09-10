@@ -165,7 +165,7 @@ COMP_DISTINTO   "!="
 
 
                 else if(strcmp(yytext, "-*") == 0 && comentarios_anidados == 0){
-                    printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext");
+                    printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext);
                 }
 }
 
