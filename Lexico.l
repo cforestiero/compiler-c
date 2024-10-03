@@ -183,8 +183,6 @@ COMP_DISTINTO   "!="
                         return CTE_CADENA; 
                     }       
                 }
-                    }       
-                }
 
 "\n"      		
 "\t"
