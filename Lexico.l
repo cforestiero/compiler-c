@@ -6,12 +6,11 @@
 #include "Lista.h"
 #include "symbol_table.h"
 
-#define MAX_NESTED_LEVEL 1
-
 FILE  *yyin;
 int yylval;
 char *yyltext;
 int yyerror(void);
+void eliminar_comillas(char* cadena);
 
 %}
 
@@ -49,48 +48,13 @@ COMP_IGUAL      "=="
 COMP_DISTINTO   "!="
 
 %%
-
-"*-"            {
-                    comentarios_anidados++;
-                    BEGIN(COMENTARIO);
+-\*[^\*]*\*-    { 
+                    printf("\nERROR LEXICO: tipo de comentario no admitido: %s\n", yytext);
                 }
-
-<COMENTARIO>  {  
-                    "*-"   { 
-                            comentarios_anidados++;
-                            if(comentarios_anidados > 2) {
-                                printf("\nERROR LEXICO: Comentario anidado de mas de un nivel.\n");
-                            }
-                            
-                        }
-
-                    "-*"   { 
-                            comentarios_anidados--;
-                            if(comentarios_anidados == 0){
-                                printf("\nEl analizador lexico reconoce a: %s como Comentario\n", yytext);
-                                BEGIN(INITIAL);
-                            }
-
-                            else if(comentarios_anidados < 0 ){
-                                printf("\nERROR LEXICO: Cerró comentario que no fue abierto.\n");
-                                BEGIN(INITIAL);
-                            }
-                        }
-                    .      { 
-                            /* Ignora cualquier otro carácter dentro de los comentarios */
-                        }
-                    [\n]   { 
-                            yylineno++;
-                        }
-                }
-
-<<EOF>> {
-    if (comentarios_anidados > 0) {
-        fprintf(stderr, "ERROR LEXICO: Fin de archivo inesperado dentro de un comentario anidado.\n");
-        exit(1);
-    }
-}
-
+\*-[^\*]*\*-.*  { 
+                    printf("\nERROR LEXICO: tipo de comentario no admitido: %s\n", yytext);
+                } 
+"*-".*"-*"        { printf("El analizador lexico reconoce a: %s como Comentario\n", yytext); }
 "binaryCount"   {printf("El analizador lexico reconoce a: %s como BinaryCount\n", yytext); return BINARYCOUNT;}
 "triangulo"     {printf("El analizador lexico reconoce a: %s como Triangulo\n", yytext); return TRIANGULO;}
 "mientras"      {printf("El analizador lexico reconoce a: %s como Mientras\n", yytext); return MIENTRAS;}
@@ -130,7 +94,6 @@ COMP_DISTINTO   "!="
 {COMP_DISTINTO}   {printf("El analizador lexico reconoce a: %s como Distinto\n", yytext); return COMP_DISTINTO;}
 {COMP_MAYOR}    {printf("El analizador lexico reconoce a: %s como Mayor\n", yytext); return COMP_MAYOR;}
 {COMP_MENOR}    {printf("El analizador lexico reconoce a: %s como Menor\n", yytext); return COMP_MENOR;}
-
 {CTE_BINARIA}   {
                     long valor = strtol(yytext + 2, NULL, 2);
                     int length = strlen(yytext) - 2;
@@ -139,18 +102,19 @@ COMP_DISTINTO   "!="
                     }
                     if (valor < -32768 || valor > 65535) {
                         printf("\nERROR LEXICO: Constante binaria %s fuera de rango para un Int de 16 bits.\n", yytext);
+                        exit(1);
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                         agregarSimbolo(yytext,"",yytext,"");
                         return CTE_BINARIA;
                     }
                 }
-
 {CTE_ENTERA}    {
                     long valor = strtol(yytext, NULL, 10); 
                     if (valor < -32768 || valor > 65535)
                     {
                         printf("ERROR LEXICO: Constante %s fuera de rango para un Int de 16 bits.\n", yytext);
+                        exit(1);
                         
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
@@ -164,6 +128,7 @@ COMP_DISTINTO   "!="
                     if (valor < -3.402823e+38 || valor > 3.402823e+38) 
                     {         
                         printf("ERROR LEXICO: Constante %f fuera de rango para un Float de 32 bits.\n", valor);  
+                        exit(1);
                     }else{
                         printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
                         agregarSimbolo(yytext,"",yytext,"");
@@ -174,11 +139,13 @@ COMP_DISTINTO   "!="
 {CTE_CADENA}    {     
                     if (strlen(yytext) - 2 > 40) 
                     {          
-                        printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);     
+                        printf("ERROR LEXICO: String %s excede los 40 caracteres permitidos.\n", yytext);   
+                        exit(1);  
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Cadena\n", yytext); 
                         char longitud[10];
                         itoa(strlen(yytext)-2, longitud,10);
+                        eliminar_comillas(yytext);
                         agregarSimbolo(yytext,"",yytext, longitud);  
                         return CTE_CADENA; 
                     }       
@@ -189,4 +156,13 @@ COMP_DISTINTO   "!="
 "\n\t"
 " "             		
 "\r\n"
-.			    { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
+.			    { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(1);}
+
+%%
+void eliminar_comillas(char* cadena) {
+    int longitud = strlen(cadena);
+    if (longitud > 1 && cadena[0] == '"' && cadena[longitud - 1] == '"') {
+        memmove(cadena, cadena + 1, longitud - 1);
+        cadena[longitud - 2] = '\0';
+    }
+}
