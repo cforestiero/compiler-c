@@ -4,28 +4,15 @@ NOMBRE                                             | TIPODATO                  |
 -3                                                 |                           | -3                                            |           
 -32768                                             |                           | -32768                                        |           
 .5                                                 |                           | .5                                            |           
-0                                                  |                           | 0                                             |           
-0b10101100                                         |                           | 0b10101100                                    |           
-0b110                                              |                           | 0b110                                         |           
 1                                                  |                           | 1                                             |           
 1.5                                                |                           | 1.5                                           |           
 2                                                  |                           | 2                                             |           
 3                                                  |                           | 3                                             |           
 4                                                  |                           | 4                                             |           
-5                                                  |                           | 5                                             |           
 65535                                              |                           | 65535                                         |           
 Esta cadena tiene exacto: 40 caracteres.           |                           | Esta cadena tiene exacto: 40 caracteres.      | 40        
-Hola                                               |                           | Hola                                          | 4         
-No se cumple.                                      |                           | No se cumple.                                 | 13        
-Ok.                                                |                           | Ok.                                           | 3         
-Se cumple la condicion.                            |                           | Se cumple la condicion.                       | 23        
 Soy una cadena                                     |                           | Soy una cadena                                | 14        
-a                                                  |                           |                                               |           
-a es mas grande que b                              |                           | a es mas grande que b                         | 21        
-a es menor que b                                   |                           | a es menor que b                              | 16        
 a1                                                 |                           |                                               |           
-b                                                  |                           |                                               |           
-c                                                  |                           |                                               |           
 float1                                             |                           |                                               |           
 float2                                             |                           |                                               |           
 float3                                             |                           |                                               |           
@@ -35,5 +22,3 @@ int3                                               |                           |
 int4                                               |                           |                                               |           
 int5                                               |                           |                                               |           
 string1                                            |                           |                                               |           
-texto                                              |                           |                                               |           
-x                                                  |                           |                                               |           
