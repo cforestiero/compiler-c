@@ -15,7 +15,7 @@ typedef struct {
 
 
 // Función para agregar un símbolo a la tabla
-int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud);
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion);
 
 int validarVariableDeclarada(char* nombre);
 

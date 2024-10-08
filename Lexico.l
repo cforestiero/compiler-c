@@ -6,8 +6,6 @@
 #include "Lista.h"
 #include "symbol_table.h"
 
-#define TODO_OK 0
-#define ERROR 1
 
 FILE  *yyin;
 char *yyltext;
@@ -72,17 +70,12 @@ COMP_DISTINTO   "!="
 "AND"           {printf("El analizador lexico reconoce a: %s como And\n", yytext); return AND;}
 "OR"            {printf("El analizador lexico reconoce a: %s como Or\n", yytext); return OR;}
 "NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
-"init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); dentroInit=1 ; return INIT;}
+"init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); dentroInit=1; return INIT;}
 
 {ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
-                 if(dentroInit) {
-                    if(agregarSimbolo(yytext,"","","") != TODO_OK) {
-                        exit(1);
-                    }
-                } else {
-                    agregarSimbolo(yytext,"","","");  // Añadir símbolo fuera de init sin verificar duplicados
-                }
-                    
+                if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
+                    exit(1);
+                }   
                 yylval.s = strdup(yytext);
                 return ID;
                 }
@@ -118,9 +111,9 @@ COMP_DISTINTO   "!="
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                         
-                        if(agregarSimbolo(yytext,"Unsigned Int",yytext,"") != TODO_OK){
+                        if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
                             exit(1);
-                        }
+                        } 
                         return CTE_BINARIA;
                     }
                 }
@@ -133,9 +126,9 @@ COMP_DISTINTO   "!="
                         
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
-                        if(agregarSimbolo(yytext,"Int",yytext,"") != TODO_OK){
-                            exit(1);
-                        }
+                        if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
+                          exit(1);
+                        } 
                         yylval.i = atoi(yytext);
                         return CTE_ENTERA;
                     }
@@ -149,9 +142,9 @@ COMP_DISTINTO   "!="
                         exit(1);
                     }else{
                         printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
-                        if(agregarSimbolo(yytext,"Float",yytext,"") != TODO_OK){
+                        if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
                             exit(1);
-                        }
+                        } 
                         return CTE_REAL; 
                     }    
                 }
@@ -166,9 +159,9 @@ COMP_DISTINTO   "!="
                         char longitud[10];
                         itoa(strlen(yytext)-2, longitud,10);
                         eliminar_comillas(yytext);
-                        if(agregarSimbolo(yytext,"String",yytext, longitud) != TODO_OK){
+                        if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
                             exit(1);
-                        }
+                        } 
                         yylval.s = strdup(yytext);
                         return CTE_CADENA; 
                     }       

@@ -7,9 +7,6 @@
 #include "symbol_table.h"
 #include "Tercetos.h"
 
-#define TODO_OK 0
-#define ERROR 1
-
 int yystopparser=0;
 FILE  *yyin;
 
@@ -187,7 +184,7 @@ sentencia:
         ;
 
 asignacion:
-        ID OP_ASIG expresion {
+        /* ID OP_ASIG expresion {
         if (validarVariableDeclarada($1) ) {
             exit(1);
         } else {
@@ -198,6 +195,14 @@ asignacion:
                 printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
         }
+    } */
+         ID OP_ASIG expresion {
+                char aux[20];
+                itoa(ExpresionInd, aux, 10);
+                AsignacionInd = agregarTerceto(":=", $1, aux);
+                printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
+                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
+        
     }
 
         | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}

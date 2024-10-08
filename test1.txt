@@ -2,7 +2,7 @@ init
 
 {
 
-    int1, int1 : Int
+    int1, int2 : Int
 
     float1: Float
 
@@ -12,6 +12,6 @@ init
  
 int1 := 1
 
-int2 := 1.3
+
 
 

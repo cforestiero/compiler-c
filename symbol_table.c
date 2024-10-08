@@ -56,16 +56,16 @@ int validarVariableDeclarada(char* nombre) {
             simbolo* existing_symbol = (simbolo*)current->dato;
             if (strcmp(existing_symbol->nombre, nombre) == 0) 
             {
-                printf("Error: La variable '%s' no ha sido declarada antes de la asignación.\n", nombre);
-                return ERROR;
+                return TODO_OK;
             }
             current = current->sig;
         }
-    return TODO_OK;
+    printf("Error: La variable '%s' no ha sido declarada antes de la asignacion.\n", nombre);
+    return ERROR;
 }
 
 
-int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud) 
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion) 
 {
 
     if (!lista_inicializada) 
@@ -83,13 +83,13 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
     if (((strcmp(tipo_de_dato, "Int") == 0 && !esEntero(valor)) || 
         (strcmp(tipo_de_dato, "Float") == 0 && !esFlotante(valor)) || 
         (strcmp(tipo_de_dato, "String") == 0 && !esString(valor)) || 
-        (strcmp(tipo_de_dato, "Binario") == 0 && !esBinario(valor)))) 
+        (strcmp(tipo_de_dato, "Unsigned Int") == 0 && !esBinario(valor)))) 
     {
         printf("ERROR SEMANTICO: El valor '%s' no es compatible con el tipo de dato '%s'.\n", valor, tipo_de_dato);
         return ERROR;
     }
 
-    if (strcmp(tipo_de_dato, "") == 0)
+    if (es_declaracion)
     {
         Nodo* current = lista_simbolos;
         while (current != NULL) 
@@ -103,7 +103,6 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
             current = current->sig;
         }
     }
-
 
 
     // usamos strncpy para evitar overflow de buffer, y forzamos que el último carácter sea \0 para asegurarnos de que las cadenas están correctamente terminadas.    
