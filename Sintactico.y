@@ -32,11 +32,16 @@ int SentenciaInd;
 
 %}
 
-%token CTE_ENTERA
+%union {
+    char* s;
+    int i; 
+}
+
+%token <i> CTE_ENTERA
 %token CTE_REAL
-%token CTE_CADENA
+%token <s> CTE_CADENA
 %token CTE_BINARIA
-%token ID
+%token <s> ID
 %token OP_ASIG
 %token OP_SUM
 %token OP_MUL
@@ -140,11 +145,14 @@ lista_de_variables:
                 char aux[20];
                 itoa(ListaVarInd,aux,10);
                 
-                ListaVarInd = agregarTerceto(",", aux, "ID");
+                ListaVarInd = agregarTerceto(",", aux, $3);
+                free($3);
                 
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
-                ListaVarInd = agregarTerceto("ID", "_", "_");
+                ListaVarInd = agregarTerceto($1, "_", "_");
+                
+                free($1);
                 
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
         ;
@@ -180,13 +188,13 @@ asignacion:
                 char aux[20];
                 itoa(ExpresionInd,aux,10);
                 
-                AsignacionInd = agregarTerceto(":=", "ID", aux);
+                AsignacionInd = agregarTerceto(":=", $1, aux);
                 
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");}
         | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}
         | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");}
         | ID OP_ASIG CTE_CADENA {
-                AsignacionInd = agregarTerceto(":=", "ID", "CTE_CADENA");
+                AsignacionInd = agregarTerceto(":=", $1, "CTE_CADENA");
 
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");}
         ;
@@ -286,10 +294,11 @@ termino:
 factor: 
      ID {
                 printf("                El analizador sintactico reconoce: <Factor> --> ID\n\n");
-                FactorInd = agregarTerceto("ID", "_", "_");
+                FactorInd = agregarTerceto($1, "_", "_");
     }
     | CTE_ENTERA {   
-                FactorInd = agregarTerceto("CTE_ENTERA", "_", "_"); 
+                char buffer[6];
+                FactorInd = agregarTerceto(itoa($1, buffer, 10), "_", "_"); 
                
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");
     }

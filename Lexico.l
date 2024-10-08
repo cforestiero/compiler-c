@@ -7,7 +7,6 @@
 #include "symbol_table.h"
 
 FILE  *yyin;
-int yylval;
 char *yyltext;
 int yyerror(void);
 void eliminar_comillas(char* cadena);
@@ -72,6 +71,7 @@ COMP_DISTINTO   "!="
 
 {ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
                 agregarSimbolo(yytext,"","","");
+                yylval.s = strdup(yytext);
                 return ID;
                 }
 {OP_ASIG}       {printf("El analizador lexico reconoce a: %s como Asignacion\n", yytext); return OP_ASIG;}
@@ -119,6 +119,7 @@ COMP_DISTINTO   "!="
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
                         agregarSimbolo(yytext,"",yytext,"");
+                        yylval.i = atoi(yytext);
                         return CTE_ENTERA;
                     }
                 }
@@ -147,6 +148,7 @@ COMP_DISTINTO   "!="
                         itoa(strlen(yytext)-2, longitud,10);
                         eliminar_comillas(yytext);
                         agregarSimbolo(yytext,"",yytext, longitud);  
+                        yylval.s = strdup(yytext);
                         return CTE_CADENA; 
                     }       
                 }
