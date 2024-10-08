@@ -8,7 +8,64 @@ int lista_inicializada = 0;
 
 int compa(const void* e1, const void* e2);
 
-void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud) 
+int esEntero(char *valor) {
+    int i;
+    for (i = 0; valor[i] != '\0'; i++) {
+        if (!isdigit(valor[i]) && !(i == 0 && valor[i] == '-')) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int esFlotante(char *valor) {
+    int punto_encontrado = 0, i;
+    for (i = 0; valor[i] != '\0'; i++) {
+        if (valor[i] == '.') {
+            if (punto_encontrado) return 0;
+            punto_encontrado = 1;
+        } else if (!isdigit(valor[i]) && !(i == 0 && valor[i] == '-')) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int esString(char *valor) {
+    int len = strlen(valor);
+    return (valor[0] == '"' && valor[len - 1] == '"');
+}
+
+int esBinario(char *valor) {
+    int i;
+    if (valor == NULL) {
+        return 0;
+    }
+    for (i = 0; valor[i] != '\0'; i++) {
+        if (valor[i] != '0' && valor[i] != '1') {
+            return 0; 
+        }
+    }
+    return 1; 
+}
+
+int validarVariableDeclarada(char* nombre) {
+    Nodo* current = lista_simbolos;
+        while (current != NULL) 
+        {
+            simbolo* existing_symbol = (simbolo*)current->dato;
+            if (strcmp(existing_symbol->nombre, nombre) == 0) 
+            {
+                printf("Error: La variable '%s' no ha sido declarada antes de la asignación.\n", nombre);
+                return ERROR;
+            }
+            current = current->sig;
+        }
+    return TODO_OK;
+}
+
+
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud) 
 {
 
     if (!lista_inicializada) 
@@ -20,8 +77,35 @@ void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitu
     if (nombre == NULL || tipo_de_dato == NULL || valor == NULL || longitud == NULL) 
     {
         printf("ERROR LEXICO: El nombre, tipo de dato, valor o longitud del simbolo no existe.\n");
-        return;
+        return  ERROR;
     }
+
+    if (((strcmp(tipo_de_dato, "Int") == 0 && !esEntero(valor)) || 
+        (strcmp(tipo_de_dato, "Float") == 0 && !esFlotante(valor)) || 
+        (strcmp(tipo_de_dato, "String") == 0 && !esString(valor)) || 
+        (strcmp(tipo_de_dato, "Binario") == 0 && !esBinario(valor)))) 
+    {
+        printf("ERROR SEMANTICO: El valor '%s' no es compatible con el tipo de dato '%s'.\n", valor, tipo_de_dato);
+        return ERROR;
+    }
+
+    if (strcmp(tipo_de_dato, "") == 0)
+    {
+        Nodo* current = lista_simbolos;
+        while (current != NULL) 
+        {
+            simbolo* existing_symbol = (simbolo*)current->dato;
+            if (strcmp(existing_symbol->nombre, nombre) == 0) 
+            {
+                printf("ERROR SEMANTICO: El simbolo '%s' ya ha sido declarado.\n", nombre);
+                return ERROR;
+            }
+            current = current->sig;
+        }
+    }
+
+
+
     // usamos strncpy para evitar overflow de buffer, y forzamos que el último carácter sea \0 para asegurarnos de que las cadenas están correctamente terminadas.    
     simbolo nuevo_simbolo;
 
@@ -38,6 +122,8 @@ void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitu
     nuevo_simbolo.longitud[sizeof(nuevo_simbolo.longitud) - 1] = '\0'; 
     // Insertar el nuevo símbolo en la lista
     insertarListaOrdSinDupli(&lista_simbolos, &nuevo_simbolo, sizeof(nuevo_simbolo),compa); 
+
+    return TODO_OK;
 }
 
 void guardarTablaDeSimbolos(const char *filename) {
@@ -84,3 +170,4 @@ int compa(const void *e1, const void *e2) {
     // Si los nombres son iguales, comparar por tipo
     return strcmp(s1->tipo_de_dato, s2->tipo_de_dato);
 }
+

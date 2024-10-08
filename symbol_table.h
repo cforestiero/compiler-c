@@ -1,6 +1,9 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+#define TODO_OK 0
+#define ERROR 1
+
 // Estructura para representar un símbolo en la tabla
 
 typedef struct {
@@ -12,7 +15,9 @@ typedef struct {
 
 
 // Función para agregar un símbolo a la tabla
-void agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud);
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud);
+
+int validarVariableDeclarada(char* nombre);
 
 // Función para guardar la tabla de símbolos en un archivo
 void guardarTablaDeSimbolos(const char *filename);

@@ -1,0 +1,17 @@
+init 
+
+{
+
+    int1, int1 : Int
+
+    float1: Float
+
+    string1: String
+
+}
+ 
+int1 := 1
+
+int2 := 1.3
+
+

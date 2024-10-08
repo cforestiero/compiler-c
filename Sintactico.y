@@ -7,6 +7,9 @@
 #include "symbol_table.h"
 #include "Tercetos.h"
 
+#define TODO_OK 0
+#define ERROR 1
+
 int yystopparser=0;
 FILE  *yyin;
 
@@ -38,10 +41,13 @@ int SentenciaInd;
 }
 
 %token <i> CTE_ENTERA
+%token CTE_ENTERA
 %token CTE_REAL
 %token <s> CTE_CADENA
+%token CTE_CADENA
 %token CTE_BINARIA
 %token <s> ID
+%token ID
 %token OP_ASIG
 %token OP_SUM
 %token OP_MUL
@@ -89,6 +95,7 @@ programa:
                 itoa(InitInd,aux,10);
                 itoa(BloqueInd,aux2,10);
                 PorgramaInd = agregarTerceto(";;",aux,aux2);
+                printf("   PorgramaInd = agregarTerceto(;;, %s, %s)\n", aux, aux2);
                 printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
                 guardarTercetos(nombre_archivo_tercetos);}
@@ -99,9 +106,8 @@ bloque:
                 char aux[20], aux2[20];
                 itoa(BloqueInd,aux,10);
                 itoa(SentenciaInd,aux2,10);
-
                 BloqueInd = agregarTerceto(";",aux,aux2);
-
+                printf("   BloqueInd = agregarTerceto(;, %s, %s)\n", aux, aux2);
                 printf("                El analizador sintactico reconoce a: <Bloque> --> <Bloque> <Sentencia>\n\n");}
         | sentencia {
                 BloqueInd = SentenciaInd;
@@ -121,7 +127,7 @@ bloque_declaracion:
                 itoa(DeclaracionInd,aux2,10);
                 
                 BloqueDeclaracionInd = agregarTerceto(";", aux, aux2);
-                
+                printf("   BloqueDeclaracionInd = agregarTerceto(; , %s, %s)\n", aux, aux2);               
                 printf("                El analizador sintactico reconoce: <Bloque_declaracion> --> <Bloque_declaracion> <Declaracion> es \n\n");}
         | declaracion {
                 BloqueDeclaracionInd = DeclaracionInd;
@@ -136,7 +142,7 @@ declaracion:
                 itoa(TipoDatoInd,aux2,10);
         
                 DeclaracionInd = agregarTerceto(":", aux, aux2);
-                
+                printf("   DeclaracionInd = agregarTerceto(: , %s, %s)\n", aux, aux2);                
                 printf("                El analizador sintactico reconoce: <Declaracion> --> <Lista_de_variables> DOS_PUNTOS <Tipo_de_dato>\n\n");}
         ;
 
@@ -145,30 +151,27 @@ lista_de_variables:
                 char aux[20];
                 itoa(ListaVarInd,aux,10);
                 
-                ListaVarInd = agregarTerceto(",", aux, $3);
-                free($3);
-                
+                ListaVarInd = agregarTerceto(",", aux, "ID");
+                printf("   ListaVarInd = agregarTerceto(, , %s, ID)\n", aux);                
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
-                ListaVarInd = agregarTerceto($1, "_", "_");
-                
-                free($1);
-                
+                ListaVarInd = agregarTerceto("ID", "_", "_");
+                printf("   ListaVarInd = agregarTerceto(ID, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
         ;
 
 tipo_de_dato:
         INT {
                 TipoDatoInd = agregarTerceto("INT", "_", "_");
-                
+                printf("   TipoDatoInd = agregarTerceto(INT, _, _)\n");               
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> INT\n\n");}
         | FLOAT {
                 TipoDatoInd = agregarTerceto("FLOAT", "_", "_");
-                
+                printf("   TipoDatoInd = agregarTerceto(FLOAT, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> FLOAT\n\n");}
         | STRING {
                 TipoDatoInd = agregarTerceto("STRING", "_", "_");
-                
+                printf("   TipoDatoInd = agregarTerceto(STRING, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> STRING\n\n");}
         ;
 
@@ -185,17 +188,23 @@ sentencia:
 
 asignacion:
         ID OP_ASIG expresion {
+        if (validarVariableDeclarada($1) ) {
+            exit(1);
+        } else {
+             
                 char aux[20];
-                itoa(ExpresionInd,aux,10);
-                
+                itoa(ExpresionInd, aux, 10);
                 AsignacionInd = agregarTerceto(":=", $1, aux);
-                
-                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");}
+                printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
+                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
+        }
+    }
+
         | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}
         | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");}
         | ID OP_ASIG CTE_CADENA {
-                AsignacionInd = agregarTerceto(":=", $1, "CTE_CADENA");
-
+                AsignacionInd = agregarTerceto(":=", "ID", "CTE_CADENA");
+                printf("   AsignacionInd = agregarTerceto(:=, ID, CTE_CADENA)\n");
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");}
         ;
 
@@ -258,6 +267,8 @@ expresion:
                 itoa(ExpresionInd,aux,10);
                 itoa(TerminoInd,aux2,10);
                 ExpresionInd = agregarTerceto("+",aux, aux2);
+                printf("   ExpresioncionInd = agregarTerceto(+, %s, %s)\n", aux, aux2);
+
                 
                 printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
     | expresion OP_RES termino {
@@ -266,6 +277,7 @@ expresion:
                 itoa(ExpresionInd,aux,10);
                 itoa(TerminoInd,aux2,10);
                 ExpresionInd = agregarTerceto("-",aux, aux2);
+                printf("   ExpresioncionInd = agregarTerceto(-, %s, %s)\n", aux, aux2);
                 printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_RES <Termino>\n\n");}
     ;
 
@@ -279,7 +291,7 @@ termino:
                 itoa(TerminoInd,aux,10);
                 itoa(FactorInd,aux2,10);
                 TerminoInd = agregarTerceto("*",aux, aux2);
-
+                printf("   TerminoInd = agregarTerceto(*, %s, %s)\n", aux, aux2);
                 printf("                El analizador sintactico reconoce: <Termino> --> <Termino> OP_MUL <Factor>\n\n");}
        |termino OP_DIV factor {
                 char aux[20], aux2[20];
@@ -287,24 +299,24 @@ termino:
                 itoa(TerminoInd,aux,10);
                 itoa(FactorInd,aux2,10);
                 TerminoInd = agregarTerceto("/",aux, aux2);
-                
+                printf("   TerminoInd = agregarTerceto(/, %s, %s)\n", aux, aux2);
                 printf("                El analizador sintactico reconoce: <Termino> --> <Termino> OP_DIV <Factor>\n\n");}
        ;
 
 factor: 
      ID {
                 printf("                El analizador sintactico reconoce: <Factor> --> ID\n\n");
-                FactorInd = agregarTerceto($1, "_", "_");
+                FactorInd = agregarTerceto("ID", "_", "_");
+                printf("   FactorInd = agregarTerceto(ID, -, -)\n");
     }
     | CTE_ENTERA {   
-                char buffer[6];
-                FactorInd = agregarTerceto(itoa($1, buffer, 10), "_", "_"); 
-               
+                FactorInd = agregarTerceto("CTE_ENTERA", "_", "_"); 
+                printf("   FactorInd = agregarTerceto(CTE_ENTERA, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");
     }
     | CTE_REAL {
                 FactorInd = agregarTerceto("CTE_REAL", "_", "_"); 
-                
+                printf("   FactorInd = agregarTerceto(CTE_REAL, -, -)\n");
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_REAL\n\n");
     }
       | PAR_A expresion PAR_C {
