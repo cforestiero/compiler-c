@@ -22,5 +22,12 @@ int validarVariableDeclarada(char* nombre);
 // Función para guardar la tabla de símbolos en un archivo
 void guardarTablaDeSimbolos(const char *filename);
 
+simbolo* buscarSimbolo(char* nombre);
+void actulizarTipoDeDato(char* nombre, char* valor, char* tipo_de_dato);
+int esEntero(char *valor);
+int esFlotante(char *valor);
+int esString(char *valor);
+int esBinario(char *valor);
+int validarVariableDeclarada(char* nombre);
 
 #endif  

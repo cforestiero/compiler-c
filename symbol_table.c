@@ -7,7 +7,7 @@ Lista lista_simbolos;
 int lista_inicializada = 0;
 
 int compa(const void* e1, const void* e2);
-
+/*
 int esEntero(char *valor) {
     int i;
     for (i = 0; valor[i] != '\0'; i++) {
@@ -105,7 +105,7 @@ void actualizarValorVariable(char* nombre, char* nuevoValor) {
    // analizar si conviene eliminar
 
 }
-
+*/
 int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion) 
 {
 
