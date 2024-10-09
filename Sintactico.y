@@ -47,13 +47,10 @@ Lista ListaAignaciones;
 }
 
 %token <i> CTE_ENTERA
-//%token CTE_ENTERA
 %token CTE_REAL
 %token <s> CTE_CADENA
-//%token CTE_CADENA
 %token CTE_BINARIA
 %token <s> ID
-//%token ID
 %token OP_ASIG
 %token OP_SUM
 %token OP_MUL
@@ -134,15 +131,15 @@ bloque_declaracion:
 declaracion:
         lista_de_variables DOS_PUNTOS tipo_de_dato {
                 //despilar hasta vaciar y colocar el tipo de dato guardado
-                char aux[sizeof(int)*4] ; // Asegúrate de que 'aux' esté apuntando a un espacio válido
+                char aux[sizeof(char[300])] ; // Asegúrate de que 'aux' esté apuntando a un espacio válido
 
                 while (!listaVacia(&ListaAignaciones)) {
                        
-                        verPrimeroLista(&ListaAignaciones, aux, sizeof(int)*4);
+                        verPrimeroLista(&ListaAignaciones, aux, sizeof(char[300]));
                         printf("MARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR %s\n", aux); // Cambiado a %d para imprimir un entero
                         DeclaracionInd = agregarTerceto(":", aux, formatear(TipoDatoInd));
                         
-                        eliminarPrimero(&ListaAignaciones, aux, sizeof(int)*4);
+                        eliminarPrimero(&ListaAignaciones, aux, sizeof(char[300]));
                         
                 }
 
@@ -153,16 +150,12 @@ declaracion:
 lista_de_variables:
         lista_de_variables COMA ID {
                 //apilar en id
-
-                insertarListaAlFinal(&ListaAignaciones, $3, sizeof(int)*4);
-
-                //ListaVarInd = agregarTerceto(",", formatear(ListaInd), $3);
-                printf("   ListaVarInd = agregarTerceto(, , %s, )\n", $3);                
+                insertarListaAlFinal(&ListaAignaciones, $3, sizeof(char[300]));
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
                 crearLista(&ListaAignaciones);
 
-                insertarListaAlFinal(&ListaAignaciones, $1, sizeof(int)*4);
+                insertarListaAlFinal(&ListaAignaciones, $1, sizeof(char[300]));
                 // buscar en la lista de simbolos el ID reconocido
                 // y agregarle el tipo de dato a ese ID
                 // donde me corno me guardo el tipo de dato con los $ 
