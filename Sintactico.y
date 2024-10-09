@@ -134,6 +134,7 @@ bloque_declaracion:
 
 declaracion:
         lista_de_variables DOS_PUNTOS tipo_de_dato {
+                //despilar hasta vaciar y colocar el tipo de dato guardado
                 char aux[20], aux2[20];
                 itoa(ListaVarInd,aux,10);
                 itoa(TipoDatoInd,aux2,10);
@@ -145,6 +146,8 @@ declaracion:
 
 lista_de_variables:
         lista_de_variables COMA ID {
+                //apilar en id
+
                 char aux[20];
                 itoa(ListaVarInd,aux,10);
                 
@@ -152,12 +155,21 @@ lista_de_variables:
                 printf("   ListaVarInd = agregarTerceto(, , %s, ID)\n", aux);                
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
+
+                //apilar id
+
+
+                // buscar en la lista de simbolos el ID reconocido
+                // y agregarle el tipo de dato a ese ID
+                // donde me corno me guardo el tipo de dato con los $ 
+
                 ListaVarInd = agregarTerceto("ID", "_", "_");
                 printf("   ListaVarInd = agregarTerceto(ID, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
         ;
 
 tipo_de_dato:
+// guardar el tipo de dato
         INT {
                 TipoDatoInd = agregarTerceto("INT", "_", "_");
                 printf("   TipoDatoInd = agregarTerceto(INT, _, _)\n");               
@@ -185,6 +197,11 @@ sentencia:
 
 asignacion:
         /* ID OP_ASIG expresion {
+                tengo que verificar que este declarada esa variable 
+                si esta declarada 
+                        entro a la tabla de simbolos y modifico la columna de valor
+                si no esta declarada
+                        error semantico
         if (validarVariableDeclarada($1) ) {
             exit(1);
         } else {
@@ -200,6 +217,7 @@ asignacion:
                 char aux[20];
                 itoa(ExpresionInd, aux, 10);
                 AsignacionInd = agregarTerceto(":=", $1, aux);
+                actualizarValorVariable($1, aux);
                 printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
         

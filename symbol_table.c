@@ -64,6 +64,47 @@ int validarVariableDeclarada(char* nombre) {
     return ERROR;
 }
 
+simbolo* buscarSimbolo(char* nombre) {
+    Nodo* current = lista_simbolos; ///funca?
+        while (current != NULL) 
+        {
+            simbolo* existing_symbol = (simbolo*)current->dato;
+            if (strcmp(existing_symbol->nombre, nombre) == 0) 
+            {
+                return current;
+            }
+            current = current->sig;
+        }
+    return NULL; 
+}
+
+void actulizarTipoDeDato(char* nombre, char* valor, char* tipo_de_dato){
+
+//buscar entre todos los nodos el nodo que quiero actulizar
+
+//validamos que lo que quiera insertar sea coherente con el tipo de dato
+if (((strcmp(tipo_de_dato, "Int") == 0 && !esEntero(valor)) || 
+        (strcmp(tipo_de_dato, "Float") == 0 && !esFlotante(valor)) || 
+        (strcmp(tipo_de_dato, "String") == 0 && !esString(valor)) || 
+        (strcmp(tipo_de_dato, "Unsigned Int") == 0 && !esBinario(valor)))) 
+    {
+        printf("ERROR SEMANTICO: El valor '%s' no es compatible con el tipo de dato '%s'.\n", valor, tipo_de_dato);
+        return ERROR;
+    }
+
+// actualizar nodo
+
+}
+
+
+void actualizarValorVariable(char* nombre, char* nuevoValor) {
+   //buscar el nodo con el mismo nombre
+   //extraer que tipo de dato es esa variable
+   // validamos que lo que quiera insertar sea coherente con el tipo de dato
+   // actulizarle el valor necesario
+   // analizar si conviene eliminar
+
+}
 
 int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion) 
 {
@@ -80,15 +121,7 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
         return  ERROR;
     }
 
-    if (((strcmp(tipo_de_dato, "Int") == 0 && !esEntero(valor)) || 
-        (strcmp(tipo_de_dato, "Float") == 0 && !esFlotante(valor)) || 
-        (strcmp(tipo_de_dato, "String") == 0 && !esString(valor)) || 
-        (strcmp(tipo_de_dato, "Unsigned Int") == 0 && !esBinario(valor)))) 
-    {
-        printf("ERROR SEMANTICO: El valor '%s' no es compatible con el tipo de dato '%s'.\n", valor, tipo_de_dato);
-        return ERROR;
-    }
-
+// aca se valida que no se declare mas de una variable con el mismo nombre
     if (es_declaracion)
     {
         Nodo* current = lista_simbolos;
@@ -104,7 +137,6 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
         }
     }
 
-
     // usamos strncpy para evitar overflow de buffer, y forzamos que el último carácter sea \0 para asegurarnos de que las cadenas están correctamente terminadas.    
     simbolo nuevo_simbolo;
 
@@ -119,6 +151,7 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
     
     strncpy(nuevo_simbolo.longitud, longitud, sizeof(nuevo_simbolo.longitud) - 1);
     nuevo_simbolo.longitud[sizeof(nuevo_simbolo.longitud) - 1] = '\0'; 
+    
     // Insertar el nuevo símbolo en la lista
     insertarListaOrdSinDupli(&lista_simbolos, &nuevo_simbolo, sizeof(nuevo_simbolo),compa); 
 
