@@ -18,6 +18,7 @@ typedef struct {
 int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud);
 
 int validarVariableDeclarada(char* nombre);
+char * retornarTipoDeDato(char* nombre);
 
 // Función para guardar la tabla de símbolos en un archivo
 void guardarTablaDeSimbolos(const char *filename);

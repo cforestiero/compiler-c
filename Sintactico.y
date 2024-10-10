@@ -213,32 +213,57 @@ sentencia:
         ;
 
 asignacion:
-        /* ID OP_ASIG expresion {
-                tengo que verificar que este declarada esa variable 
-                si esta declarada 
-                        entro a la tabla de simbolos y modifico la columna de valor
-                si no esta declarada
-                        error semantico
-        if (validarVariableDeclarada($1) ) {
-            exit(1);
-        } else {
-                AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresioncionInd));
-                //printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
-                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
-        }
-    } */
          ID OP_ASIG expresion {
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+
+                if(strcmp(tipoObtenido,"String")==0){
+                     printf("ERROR SEMANTICO: %s es del tipo String, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
                 AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresionInd));
-                //actualizarValorVariable($1, aux);
                 //printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
-        
                         }
 
-        | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}
-        | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");}
+        | ID OP_ASIG funcion_triangulo {
+                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+
+                if(strcmp(tipoObtenido,"String")!=0){
+                     printf("ERROR SEMANTICO: %s no es del tipo String, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
+                }
+        | ID OP_ASIG funcion_binaryCount {
+                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+                if(strcmp(tipoObtenido,"Int")!=0){
+                     printf("ERROR SEMANTICO: %s no es del tipo Int, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
+                }
         | ID OP_ASIG CTE_CADENA {
-                //solo validar coherencia de asignacion aca
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+                if(strcmp(tipoObtenido,"String")!=0){
+                     printf("ERROR SEMANTICO: %s no es del tipo String, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
                 AsignacionInd = agregarTerceto(":=", $1, $3);
                 printf("   AsignacionInd = agregarTerceto(:=, $1, $3)\n");
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");
