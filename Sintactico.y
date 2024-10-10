@@ -37,6 +37,8 @@ int SeleccionInd;
 int EscrituraInd; 
 int LecturaInd;
 
+int listaCreada = 0;
+
 Lista ListaAignaciones;
 
 %}
@@ -85,6 +87,7 @@ Lista ListaAignaciones;
 %token OR
 %token NOT
 %token INIT
+%type <s> tipo_de_dato
 
 %left '+''-'
 %left '*''/'
@@ -130,17 +133,15 @@ bloque_declaracion:
 
 declaracion:
         lista_de_variables DOS_PUNTOS tipo_de_dato {
-                //despilar hasta vaciar y colocar el tipo de dato guardado
-                char aux[sizeof(char[300])] ; // Asegúrate de que 'aux' esté apuntando a un espacio válido
-
+                char aux[sizeof(char[300])] ;
                 while (!listaVacia(&ListaAignaciones)) {
-                       
-                        verPrimeroLista(&ListaAignaciones, aux, sizeof(char[300]));
-                        printf("MARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR %s\n", aux); // Cambiado a %d para imprimir un entero
-                        DeclaracionInd = agregarTerceto(":", aux, formatear(TipoDatoInd));
-                        
                         eliminarPrimero(&ListaAignaciones, aux, sizeof(char[300]));
-                        
+                        printf("\n\n\nQuiero insertar este tipo de dato %s a la tabla\n\n\n",$3);
+
+                        if(agregarSimbolo(aux,$3,"","") != TODO_OK) {
+                                exit(1);
+                        }   
+                        DeclaracionInd = agregarTerceto(":", aux, formatear(TipoDatoInd));        
                 }
 
                 //printf("   DeclaracionInd = agregarTerceto(: , %s, %s)\n", aux, aux2);                
@@ -149,24 +150,26 @@ declaracion:
 
 lista_de_variables:
         lista_de_variables COMA ID {
-                //apilar en id
-                insertarListaAlFinal(&ListaAignaciones, $3, sizeof(char[300]));
+                printf("\n\n\nQuiero insertar %s a la lista\n\n\n",$3);
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+                        exit(1);
+                }
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
-                crearLista(&ListaAignaciones);
+                if(!listaCreada){
+                        printf("\n\n\nEntre a crear la lista\n\n\n");
+                        crearLista(&ListaAignaciones);
+                        listaCreada = 1;
+                }
+                printf("\n\n\nQuiero insertar %s a la lista\n\n\n",$1);
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+                        exit(1);
+                }
 
-                insertarListaAlFinal(&ListaAignaciones, $1, sizeof(char[300]));
-                // buscar en la lista de simbolos el ID reconocido
-                // y agregarle el tipo de dato a ese ID
-                // donde me corno me guardo el tipo de dato con los $ 
-
-                //ListaVarInd = agregarTerceto($1, "_", "_");
-                printf("   ListaVarInd = agregarTerceto($1, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
         ;
 
 tipo_de_dato:
-// guardar el tipo de dato
         INT {
                 TipoDatoInd = agregarTerceto("INT", "_", "_");
                 printf("   TipoDatoInd = agregarTerceto(INT, _, _)\n");               
@@ -230,11 +233,12 @@ asignacion:
                 //printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
         
-    }
+                        }
 
         | ID OP_ASIG funcion_triangulo {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");}
         | ID OP_ASIG funcion_binaryCount {printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");}
         | ID OP_ASIG CTE_CADENA {
+                //solo validar coherencia de asignacion aca
                 AsignacionInd = agregarTerceto(":=", $1, $3);
                 printf("   AsignacionInd = agregarTerceto(:=, $1, $3)\n");
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");

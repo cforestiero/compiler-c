@@ -12,8 +12,6 @@ char *yyltext;
 int yyerror(void);
 void eliminar_comillas(char* cadena);
 
-int dentroInit = 0;
-
 %}
 
 %option noyywrap  
@@ -64,18 +62,15 @@ COMP_DISTINTO   "!="
 "si"            {printf("El analizador lexico reconoce a: %s como Si\n", yytext); return SI;}
 "escribir"      {printf("El analizador lexico reconoce a: %s como Escribir\n", yytext); return ESCRIBIR;}
 "leer"          {printf("El analizador lexico reconoce a: %s como Leer\n", yytext); return LEER;}
-"Float"         {printf("El analizador lexico reconoce a: %s como Float\n", yytext); return FLOAT;}
-"Int"           {printf("El analizador lexico reconoce a: %s como Int\n", yytext); return INT;}
-"String"        {printf("El analizador lexico reconoce a: %s como String\n", yytext); return STRING;}
+"Float"         {printf("El analizador lexico reconoce a: %s como Float\n", yytext); yylval.s = strdup(yytext); return FLOAT;}
+"Int"           {printf("El analizador lexico reconoce a: %s como Int\n", yytext);yylval.s = strdup(yytext); return INT;}
+"String"        {printf("El analizador lexico reconoce a: %s como String\n", yytext); yylval.s = strdup(yytext);return STRING;}
 "AND"           {printf("El analizador lexico reconoce a: %s como And\n", yytext); return AND;}
 "OR"            {printf("El analizador lexico reconoce a: %s como Or\n", yytext); return OR;}
 "NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
-"init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); dentroInit=1; return INIT;}
+"init"          {printf("El analizador lexico reconoce a: %s como Init\n", yytext); return INIT;}
 
-{ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext); 
-                if(agregarSimbolo(yytext,"","","", dentroInit) != TODO_OK) {
-                    exit(1);
-                }   
+{ID}            {printf("El analizador lexico reconoce a: %s como Identificador\n", yytext);  
                 yylval.s = strdup(yytext);
                 return ID;
                 }
@@ -87,7 +82,7 @@ COMP_DISTINTO   "!="
 {PAR_A}         {printf("El analizador lexico reconoce a: %s como Parentesis Abre\n", yytext); return PAR_A;}
 {PAR_C}         {printf("El analizador lexico reconoce a: %s como Parentesis Cierra\n", yytext); return PAR_C;}
 {LLAVE_A}       {printf("El analizador lexico reconoce a: %s como Llave Abre\n", yytext); return LLAVE_A;}
-{LLAVE_C}       {printf("El analizador lexico reconoce a: %s como Llave Cierra\n", yytext); dentroInit = 0; return LLAVE_C;}
+{LLAVE_C}       {printf("El analizador lexico reconoce a: %s como Llave Cierra\n", yytext); return LLAVE_C;}
 {CORCHETE_A}    {printf("El analizador lexico reconoce a: %s como Corchete Abre\n", yytext); return CORCHETE_A;}
 {CORCHETE_C}    {printf("El analizador lexico reconoce a: %s como Corchete Cierra\n", yytext); return CORCHETE_C;}
 {COMA}          {printf("El analizador lexico reconoce a: %s como Coma\n", yytext); return COMA;}
@@ -111,7 +106,7 @@ COMP_DISTINTO   "!="
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                         
-                        if(agregarSimbolo(yytext,"","",yytext, dentroInit) != TODO_OK) {
+                        if(agregarSimbolo(yytext,"","",yytext) != TODO_OK) {
                             exit(1);
                         } 
                         return CTE_BINARIA;
@@ -126,7 +121,7 @@ COMP_DISTINTO   "!="
                         
                     }else{
                         printf("El analizador lexico reconoce a: %s como Constante Entera\n", yytext);
-                        if(agregarSimbolo(yytext,"",yytext,"", dentroInit) != TODO_OK) {
+                        if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                           exit(1);
                         } 
                         yylval.i = atoi(yytext);
@@ -142,7 +137,7 @@ COMP_DISTINTO   "!="
                         exit(1);
                     }else{
                         printf("El analizador lexico reconoce a: %f como Constante Real\n", valor); 
-                        if(agregarSimbolo(yytext,"",yytext,"", dentroInit) != TODO_OK) {
+                        if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                             exit(1);
                         } 
                         return CTE_REAL; 
@@ -159,7 +154,7 @@ COMP_DISTINTO   "!="
                         char longitud[10];
                         itoa(strlen(yytext)-2, longitud,10);
                         eliminar_comillas(yytext);
-                        if(agregarSimbolo(yytext,"",yytext,"", dentroInit) != TODO_OK) {
+                        if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                             exit(1);
                         } 
                         yylval.s = strdup(yytext);

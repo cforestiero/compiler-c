@@ -4,7 +4,7 @@ init
 
     int1, int2: Int
 
-    float1: Float
+    float1,  float2: Float
 
     string1: String
 

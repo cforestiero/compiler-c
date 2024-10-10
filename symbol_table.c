@@ -106,7 +106,7 @@ void actualizarValorVariable(char* nombre, char* nuevoValor) {
 
 }
 */
-int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion) 
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud) 
 {
 
     if (!lista_inicializada) 
@@ -119,22 +119,6 @@ int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud
     {
         printf("ERROR LEXICO: El nombre, tipo de dato, valor o longitud del simbolo no existe.\n");
         return  ERROR;
-    }
-
-// aca se valida que no se declare mas de una variable con el mismo nombre
-    if (es_declaracion)
-    {
-        Nodo* current = lista_simbolos;
-        while (current != NULL) 
-        {
-            simbolo* existing_symbol = (simbolo*)current->dato;
-            if (strcmp(existing_symbol->nombre, nombre) == 0) 
-            {
-                printf("ERROR SEMANTICO: El simbolo '%s' ya ha sido declarado.\n", nombre);
-                return ERROR;
-            }
-            current = current->sig;
-        }
     }
 
     // usamos strncpy para evitar overflow de buffer, y forzamos que el último carácter sea \0 para asegurarnos de que las cadenas están correctamente terminadas.    
@@ -203,3 +187,20 @@ int compa(const void *e1, const void *e2) {
     return strcmp(s1->tipo_de_dato, s2->tipo_de_dato);
 }
 
+
+int compararArrojandoError(const void *e1, const void *e2) {
+    // Me llegan dos nombres
+    printf("\n\n\nHOLA ESTOY COMPARANDO LOS NOMBRES\n\n\n");
+
+    const char *s1 = (const char *)e1;
+    const char *s2 = (const char *)e2;
+    
+    int rta = strcmp(s1, s2);
+
+    if (rta == 0) {
+        printf("ERROR SEMANTICO: El simbolo '%s' ya ha sido declarado.\n", s1);
+        return ERROR;  // Asegúrate de que ERROR esté definido, por ejemplo, #define ERROR -1
+    }
+
+    return rta;
+}
