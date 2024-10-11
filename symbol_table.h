@@ -15,9 +15,10 @@ typedef struct {
 
 
 // Función para agregar un símbolo a la tabla
-int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud, int es_declaracion);
+int agregarSimbolo(char *nombre, char *tipo_de_dato, char *valor, char *longitud);
 
 int validarVariableDeclarada(char* nombre);
+char * retornarTipoDeDato(char* nombre);
 
 // Función para guardar la tabla de símbolos en un archivo
 void guardarTablaDeSimbolos(const char *filename);
@@ -29,5 +30,7 @@ int esFlotante(char *valor);
 int esString(char *valor);
 int esBinario(char *valor);
 int validarVariableDeclarada(char* nombre);
+
+int compararArrojandoError(const void *e1, const void *e2);
 
 #endif  
