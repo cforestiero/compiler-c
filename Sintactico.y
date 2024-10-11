@@ -36,20 +36,24 @@ int IteracionInd;
 int SeleccionInd; 
 int EscrituraInd; 
 int LecturaInd;
+int EntradaInd;
+int SalidaInd;
+int BinaryCountInd;
+int TrianguloInd;
+
+int cont=0;
 
 int listaCreada = 0;
-
 Lista ListaAignaciones;
 
 %}
 
 %union {
     char* s;
-    int i; 
 }
 
-%token <i> CTE_ENTERA
-%token CTE_REAL
+%token <s> CTE_ENTERA
+%token <s> CTE_REAL
 %token <s> CTE_CADENA
 %token CTE_BINARIA
 %token <s> ID
@@ -88,6 +92,7 @@ Lista ListaAignaciones;
 %token NOT
 %token INIT
 %type <s> tipo_de_dato
+%type <s> elemento
 
 %left '+''-'
 %left '*''/'
@@ -171,15 +176,15 @@ lista_de_variables:
 
 tipo_de_dato:
         INT {
-                TipoDatoInd = agregarTerceto("INT", "_", "_");
+                TipoDatoInd = agregarTerceto("Int", "_", "_");
                 printf("   TipoDatoInd = agregarTerceto(INT, _, _)\n");               
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> INT\n\n");}
         | FLOAT {
-                TipoDatoInd = agregarTerceto("FLOAT", "_", "_");
+                TipoDatoInd = agregarTerceto("Float", "_", "_");
                 printf("   TipoDatoInd = agregarTerceto(FLOAT, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> FLOAT\n\n");}
         | STRING {
-                TipoDatoInd = agregarTerceto("STRING", "_", "_");
+                TipoDatoInd = agregarTerceto("String", "_", "_");
                 printf("   TipoDatoInd = agregarTerceto(STRING, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> STRING\n\n");}
         ;
@@ -241,6 +246,8 @@ asignacion:
                      printf("ERROR SEMANTICO: %s no es del tipo String, asignacion invalida.\n", $1);
                      exit(1);   
                 }
+
+                AsignacionInd = agregarTerceto(":=", $1, formatear(TrianguloInd));
                 }
         | ID OP_ASIG funcion_binaryCount {
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");
@@ -253,6 +260,7 @@ asignacion:
                      printf("ERROR SEMANTICO: %s no es del tipo Int, asignacion invalida.\n", $1);
                      exit(1);   
                 }
+                AsignacionInd = agregarTerceto(":=", $1, formatear(BinaryCountInd));
                 }
         | ID OP_ASIG CTE_CADENA {
                 if(validarVariableDeclarada($1) != TODO_OK){
@@ -300,22 +308,35 @@ iteracion:
         ;
 
 escritura:
-        ESCRIBIR PAR_A salida PAR_C {printf("                El analizador sintactico reconoce: <Escritura> --> ESCRIBIR PAR_A <Salida> PAR_C\n\n");}
+        ESCRIBIR PAR_A salida PAR_C {printf("                El analizador sintactico reconoce: <Escritura> --> ESCRIBIR PAR_A <Salida> PAR_C\n\n");
+        EscrituraInd= agregarTerceto("ESCRIBIR",formatear(SalidaInd),"_");
+        }
         ;
 
 salida:
-        ID {printf("                El analizador sintactico reconoce: <Salida> --> ID\n\n");}
-        | CTE_CADENA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_CADENA\n\n");}
-        | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_ENTERA\n\n");}
-        | CTE_REAL {printf("                El analizador sintactico reconoce: <Salida> --> CTE_REAL\n\n");}
+        ID {printf("                El analizador sintactico reconoce: <Salida> --> ID\n\n");
+        SalidaInd= agregarTerceto($1,"_","_");
+        }
+        | CTE_CADENA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_CADENA\n\n");
+        SalidaInd= agregarTerceto($1,"_","_");
+        }
+        | CTE_ENTERA {printf("                El analizador sintactico reconoce: <Salida> --> CTE_ENTERA\n\n");
+        SalidaInd= agregarTerceto($1,"_","_");
+        }
+        | CTE_REAL {printf("                El analizador sintactico reconoce: <Salida> --> CTE_REAL\n\n");
+        SalidaInd= agregarTerceto($1,"_","_");
+        }
         ;
 
 lectura:
-        LEER PAR_A entrada PAR_C {printf("                El analizador sintactico reconoce: <Lectura> --> LEER PAR_A <Entrada> PAR_C\n\n");}
+        LEER PAR_A entrada PAR_C {printf("                El analizador sintactico reconoce: <Lectura> --> LEER PAR_A <Entrada> PAR_C\n\n");
+        LecturaInd= agregarTerceto("LEER",formatear(EntradaInd),"_");}
+        
         ;
 
 entrada:
-        ID {printf("                El analizador sintactico reconoce: <Entrada> --> ID\n\n");}
+        ID {printf("                El analizador sintactico reconoce: <Entrada> --> ID\n\n");
+        EntradaInd= agregarTerceto($1,"_","_");}
         ;
 
 expresion:
@@ -356,33 +377,64 @@ factor:
                 printf("   FactorInd = agregarTerceto(ID, -, -)\n");
     }
     | CTE_ENTERA {   
-                FactorInd = agregarTerceto("CTE_ENTERA", "_", "_"); 
+                
+                FactorInd = agregarTerceto($1, "_", "_"); 
                 printf("   FactorInd = agregarTerceto(CTE_ENTERA, _, _)\n");
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");
     }
     | CTE_REAL {
-                FactorInd = agregarTerceto("CTE_REAL", "_", "_"); 
+                FactorInd = agregarTerceto($1, "_", "_"); 
                 printf("   FactorInd = agregarTerceto(CTE_REAL, -, -)\n");
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_REAL\n\n");
     }
       | PAR_A expresion PAR_C {
                 printf("                El analizador sintactico reconoce: <Factor> --> PAR_A <Expresion> PAR_C\n\n");}
       | OP_RES PAR_A expresion PAR_C %prec MENOS_UNARIO {
-                printf("                El analizador sintactico reconoce: <Factor> --> -(<Expresion>)\n\n");}
+                printf("                El analizador sintactico reconoce: <Factor> --> -(<Expresion>)\n\n");
+                
+                }
       | OP_RES ID %prec MENOS_UNARIO {
-                printf("                El analizador sintactico reconoce: <Factor> --> - ID\n\n");}
+                printf("                El analizador sintactico reconoce: <Factor> --> - ID\n\n");
+                FactorInd= agregarTerceto("-","0",$2);
+                }
       ;
 
 funcion_triangulo:
-      TRIANGULO PAR_A lista_parametros PAR_C {printf("                El analizador sintactico reconoce: <Funcion_triangulo> --> TRIANGULO PAR_A <Lista_parametros> PAR_C\n\n");}
+      TRIANGULO PAR_A lista_parametros PAR_C 
+      {printf("                El analizador sintactico reconoce: <Funcion_triangulo> --> TRIANGULO PAR_A <Lista_parametros> PAR_C\n\n");
+      TrianguloInd= agregarTerceto("CMP","lado1","lado2");
+        agregarTerceto("BNE",formatear(TrianguloInd+6),"_");
+        agregarTerceto("CMP","lado2","lado3");
+        agregarTerceto("BNE",formatear(TrianguloInd+6),"_");
+        agregarTerceto(":=","resultado","Equilatero");
+        agregarTerceto("BI",formatear(TrianguloInd+15),"_");
+        agregarTerceto("CMP","lado1","lado2");
+        agregarTerceto("BEQ",formatear(TrianguloInd+12),"_");
+        agregarTerceto("CMP","lado1","lado3");
+        agregarTerceto("BEQ",formatear(TrianguloInd+12),"_");
+        agregarTerceto("CMP","lado2","lado3");
+        agregarTerceto("BNE",formatear(TrianguloInd+14),"_");
+        agregarTerceto(":=","resultado","Isosceles");
+        agregarTerceto("BI",formatear(TrianguloInd+15),"_");
+        agregarTerceto(":=","resultado","Escaleno");
+      }
       ;
 
 lista_parametros:
-       expresion COMA expresion COMA expresion {printf("                El analizador sintactico reconoce: <Lista_parametros> --> <Expresion> COMA <Expresion> COMA <Expresion>\n\n");}
+       expresion {agregarTerceto(":=","lado1",formatear(ExpresionInd));}
+       COMA expresion {agregarTerceto(":=","lado2",formatear(ExpresionInd));}
+       COMA expresion { agregarTerceto(":=","lado3",formatear(ExpresionInd));
+        printf("                El analizador sintactico reconoce: <Lista_parametros> --> <Expresion> COMA <Expresion> COMA <Expresion>\n\n");}
       ;
 
 funcion_binaryCount:
-      BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {printf("                El analizador sintactico reconoce: <Funcion_binaryCount> --> BINARYCOUNT PAR_A CORCHETE_A <Lista> CORCHETE_C PAR_C\n\n");}
+        BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {
+        printf("                El analizador sintactico reconoce: <Funcion_binaryCount> --> BINARYCOUNT PAR_A CORCHETE_A <Lista> CORCHETE_C PAR_C\n\n");
+        char cant[6];
+        sprintf(cant, "%d", cont);
+        BinaryCountInd= agregarTerceto(cant,"_","_");
+        cont=0;
+        }
       ;
 
 lista:
@@ -393,6 +445,7 @@ lista:
         }
       | lista COMA elemento {
 
+                printf("ELEMENTO ES: %s", $3);
                 ListaInd = agregarTerceto(",", formatear(ListaInd), formatear(ElementoInd));
                 ///printf("   ListaVarInd = agregarTerceto(",", aux, aux2)\n", aux);    
                 
@@ -404,22 +457,23 @@ lista:
 elemento:
       ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
-                ElementoInd = agregarTerceto("ID", "_", "_");
+                ElementoInd = agregarTerceto($1, "_", "_");
                 printf("   ElementoInd = agregarTerceto(ID, -, -)\n");
         }
       | CTE_ENTERA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_ENTERA\n\n");
-                ElementoInd = agregarTerceto("CTE_ENTERA", "_", "_");
+                ElementoInd = agregarTerceto($1, "_", "_");
                 printf("   ElementoInd = agregarTerceto(CTE_ENTERA, -, -)\n");
         }
       | CTE_REAL {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_REAL\n\n");
-                ElementoInd = agregarTerceto("CTE_REAL", "_", "_");
+                ElementoInd = agregarTerceto($1, "_", "_");
                 printf("   ElementoInd = agregarTerceto(CTE_REAL, -, -)\n");
         }
       | CTE_BINARIA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_BINARIA\n\n");
                 ElementoInd = agregarTerceto("CTE_BINARIA", "_", "_");
+                cont++;
                 printf("   ElementoInd = agregarTerceto(CTE_BINARIA, -, -)\n");
         }
       ;

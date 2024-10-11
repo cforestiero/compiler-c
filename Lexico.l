@@ -95,23 +95,16 @@ COMP_DISTINTO   "!="
 {COMP_MAYOR}    {printf("El analizador lexico reconoce a: %s como Mayor\n", yytext); return COMP_MAYOR;}
 {COMP_MENOR}    {printf("El analizador lexico reconoce a: %s como Menor\n", yytext); return COMP_MENOR;}
 {CTE_BINARIA}   {
-                    long valor = strtol(yytext + 2, NULL, 2);
-                    int length = strlen(yytext) - 2;
-                    if (length == 16 && yytext[2] == '1') {  
-                        valor -= (1L << 16); 
-                    }
-                    if (valor < -32768 || valor > 65535) {
-                        printf("\nERROR LEXICO: Constante binaria %s fuera de rango para un Int de 16 bits.\n", yytext);
-                        exit(1);
-                    }else{
+                    
                         printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                         
                         if(agregarSimbolo(yytext,"","",yytext) != TODO_OK) {
                             exit(1);
                         } 
+                        yylval.s = strdup(yytext);
                         return CTE_BINARIA;
                     }
-                }
+                
 {CTE_ENTERA}    {
                     long valor = strtol(yytext, NULL, 10); 
                     if (valor < -32768 || valor > 65535)
@@ -124,7 +117,7 @@ COMP_DISTINTO   "!="
                         if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                           exit(1);
                         } 
-                        yylval.i = atoi(yytext);
+                        yylval.s = strdup(yytext);
                         return CTE_ENTERA;
                     }
                 }
@@ -140,6 +133,7 @@ COMP_DISTINTO   "!="
                         if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                             exit(1);
                         } 
+                        yylval.s = strdup(yytext);
                         return CTE_REAL; 
                     }    
                 }
