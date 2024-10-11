@@ -98,7 +98,7 @@ COMP_DISTINTO   "!="
                     
                         printf("El analizador lexico reconoce a: %s como Constante Binaria\n", yytext); 
                         
-                        if(agregarSimbolo(yytext,"","",yytext) != TODO_OK) {
+                        if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
                             exit(1);
                         } 
                         yylval.s = strdup(yytext);
@@ -148,7 +148,7 @@ COMP_DISTINTO   "!="
                         char longitud[10];
                         itoa(strlen(yytext)-2, longitud,10);
                         eliminar_comillas(yytext);
-                        if(agregarSimbolo(yytext,"",yytext,"") != TODO_OK) {
+                        if(agregarSimbolo(yytext,"",yytext,longitud) != TODO_OK) {
                             exit(1);
                         } 
                         yylval.s = strdup(yytext);

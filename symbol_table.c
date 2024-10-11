@@ -124,7 +124,6 @@ int compa(const void *e1, const void *e2) {
 
 int compararArrojandoError(const void *e1, const void *e2) {
     // Me llegan dos nombres
-    printf("\n\n\nHOLA ESTOY COMPARANDO LOS NOMBRES\n\n\n");
 
     const char *s1 = (const char *)e1;
     const char *s2 = (const char *)e2;
