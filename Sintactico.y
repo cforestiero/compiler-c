@@ -13,6 +13,7 @@ FILE  *yyin;
 int yyerror();
 int yylex();
 char* formatear(int indice);
+char* formatearComparador(char* comparador);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
@@ -36,8 +37,17 @@ int IteracionInd;
 int SeleccionInd; 
 int EscrituraInd; 
 int LecturaInd;
+int Xind;
+int CondicionInd;
+int ComparacionInd;
+int SeleccionSinoInd;
+
+int CondicionTipo;
 
 Lista ListaAignaciones;
+Lista ListaComparaciones;
+Lista ListaComparadores;
+Lista ListaCondicionesTipo;
 
 %}
 
@@ -47,13 +57,10 @@ Lista ListaAignaciones;
 }
 
 %token <i> CTE_ENTERA
-//%token CTE_ENTERA
 %token CTE_REAL
 %token <s> CTE_CADENA
-//%token CTE_CADENA
 %token CTE_BINARIA
 %token <s> ID
-//%token ID
 %token OP_ASIG
 %token OP_SUM
 %token OP_MUL
@@ -92,6 +99,7 @@ Lista ListaAignaciones;
 %left '+''-'
 %left '*''/'
 %right MENOS_UNARIO
+%right SINO
 
 %%
 
@@ -139,7 +147,7 @@ declaracion:
                 while (!listaVacia(&ListaAignaciones)) {
                        
                         verPrimeroLista(&ListaAignaciones, aux, sizeof(int)*4);
-                        printf("MARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR %s\n", aux); // Cambiado a %d para imprimir un entero
+                        //printf("MARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR %s\n", aux); // Cambiado a %d para imprimir un entero
                         DeclaracionInd = agregarTerceto(":", aux, formatear(TipoDatoInd));
                         
                         eliminarPrimero(&ListaAignaciones, aux, sizeof(int)*4);
@@ -203,7 +211,7 @@ sentencia:
                 SentenciaInd = SeleccionInd;
                 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <seleccion>\n\n");
-        }                     
+        }                           
         | escritura {
                 SentenciaInd = EscrituraInd;
                 
@@ -217,20 +225,6 @@ sentencia:
         ;
 
 asignacion:
-        /* ID OP_ASIG expresion {
-                tengo que verificar que este declarada esa variable 
-                si esta declarada 
-                        entro a la tabla de simbolos y modifico la columna de valor
-                si no esta declarada
-                        error semantico
-        if (validarVariableDeclarada($1) ) {
-            exit(1);
-        } else {
-                AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresioncionInd));
-                //printf("   AsignacionInd = agregarTerceto(:=, %s, %s)\n", $1, aux);
-                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
-        }
-    } */
          ID OP_ASIG expresion {
                 AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresionInd));
                 //actualizarValorVariable($1, aux);
@@ -247,30 +241,193 @@ asignacion:
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");
         }
         ;
-
 seleccion:
-        SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C SINO LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C SINO LLAVE_A <Bloque> LLAVE_C\n\n");}
-        | SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C\n\n");}
+        SI PAR_A {
+                crearLista(&ListaComparaciones);
+                crearLista(&ListaComparadores);
+                crearLista(&ListaCondicionesTipo);
+        }
+        condicion PAR_C LLAVE_A bloque LLAVE_C seleccion_sino
+        
         ;
 
+seleccion_sino:
+        /* vacio */ {
+
+                printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C\n\n");
+                
+                int auxCompracion;
+                verUltimoLista(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
+                int auxIndice;
+                
+                switch(auxCompracion){
+                        case 1:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 2:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 3:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+
+                                int segundaCond = auxIndice;
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                actualizarTerceto(auxIndice,formatear(segundaCond+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 4:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                } 
+                eliminarUltimo(&ListaComparaciones, &auxCompracion, sizeof(int));
+                SeleccionInd = BloqueInd;
+
+                printf("                El analizador sintactico reconoce: <Seleccion> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C SINO LLAVE_A <Bloque> LLAVE_C\n\n");
+        }
+        | SINO {
+                //printf("rntre en sino\n");
+
+                int auxCompracion;
+                verUltimoLista(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
+                int auxIndice;
+                
+                switch(auxCompracion){
+                        case 1:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+2));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 2:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+2));
+                                //printf("%d",BloqueInd);
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+2));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 3:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+2));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+
+                                int segundaCond = auxIndice;
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                actualizarTerceto(auxIndice,formatear(segundaCond+1));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                        case 4:
+                                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                actualizarTerceto(auxIndice,formatear(BloqueInd+2));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                break;
+                } 
+                eliminarUltimo(&ListaComparaciones, &auxCompracion, sizeof(int));
+                
+                SeleccionInd = agregarTerceto("BI",formatear(auxIndice),"_");
+                insertarListaAlFinal(&ListaComparaciones, &SeleccionInd, sizeof(SeleccionInd));
+        }
+        LLAVE_A bloque LLAVE_C {
+                int auxIndice;
+                
+                verUltimoLista(&ListaComparaciones, &auxIndice, sizeof(int));
+                actualizarTerceto(auxIndice,formatear(BloqueInd+1));
+                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+
+                SeleccionInd = BloqueInd;
+
+                printf("                El analizador sintactico reconoce: <Seleccion_sino> --> SI PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C SINO LLAVE_A <Bloque> LLAVE_C\n\n");
+        }
+        ;
+
+
 condicion:
-        comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion>\n\n");}
-        | comparacion AND comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> AND <Comparacion>\n\n");}
-        | comparacion OR comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> OR <Comparacion>\n\n");}
-        | NOT comparacion {printf("                El analizador sintactico reconoce: <Condicion> --> NOT <Comparacion>\n\n");}
+        comparacion {
+                printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion>\n\n");
+                CondicionTipo = 1;
+                insertarListaAlFinal(&ListaCondicionesTipo, &CondicionTipo, sizeof(int));
+        }
+        | comparacion AND comparacion {
+                printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> AND <Comparacion>\n\n");
+                CondicionTipo = 2;
+                insertarListaAlFinal(&ListaCondicionesTipo, &CondicionTipo, sizeof(int));
+
+        }
+        | comparacion OR comparacion {
+                printf("                El analizador sintactico reconoce: <Condicion> --> <Comparacion> OR <Comparacion>\n\n");
+                CondicionTipo = 3;
+                insertarListaAlFinal(&ListaCondicionesTipo, &CondicionTipo, sizeof(int));
+
+        }
+        | NOT comparacion {
+                printf("                El analizador sintactico reconoce: <Condicion> --> NOT <Comparacion>\n\n");
+                CondicionTipo = 4;
+                insertarListaAlFinal(&ListaCondicionesTipo, &CondicionTipo, sizeof(int));
+        }
         ;
 
 comparacion:
-        expresion comparador expresion {printf("                El analizador sintactico reconoce: <Comparacion> --> <Expresion> <Comparador> <Expresion>\n\n");}
+        expresion {
+                ComparacionInd = ExpresionInd;
+
+        }
+        comparador expresion {
+                
+                printf("                El analizador sintactico reconoce: <Comparacion> --> <Expresion> <Comparador> <Expresion>\n\n");
+                
+                agregarTerceto("CMP",formatear(ComparacionInd),formatear(ExpresionInd));
+                
+                char auxComparador[2];
+                verUltimoLista(&ListaComparadores, auxComparador, sizeof(auxComparador));
+                ComparacionInd = agregarTerceto(formatearComparador(auxComparador), "_", "_");
+                eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
+
+                insertarListaAlFinal(&ListaComparaciones, &ComparacionInd, sizeof(ComparacionInd));
+        }
         ;
 
 comparador:
-        COMP_MAYOR {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYOR\n\n");}
-        | COMP_MENOR {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENOR\n\n");}
-        | COMP_MAYORIGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYORIGUAL\n\n");}
-        | COMP_MENORIGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENORIGUAL\n\n");}
-        | COMP_IGUAL {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_IGUAL\n\n");}
-        | COMP_DISTINTO {printf("                El analizador sintactico reconoce: <Comparador> --> COMP_DISTINTO\n\n");}
+        COMP_MAYOR {
+                insertarListaAlFinal(&ListaComparadores, ">", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYOR\n\n");
+        }
+        | COMP_MENOR {
+                insertarListaAlFinal(&ListaComparadores, "<", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENOR\n\n");
+        }
+        | COMP_MAYORIGUAL {
+                insertarListaAlFinal(&ListaComparadores, ">=", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYORIGUAL\n\n");
+        }
+        | COMP_MENORIGUAL {
+                insertarListaAlFinal(&ListaComparadores, "<=", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENORIGUAL\n\n");
+        }
+        | COMP_IGUAL { 
+                insertarListaAlFinal(&ListaComparadores, "==", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_IGUAL\n\n");
+        }
+        | COMP_DISTINTO {
+                insertarListaAlFinal(&ListaComparadores, "!=", sizeof(char[2]));
+                printf("                El analizador sintactico reconoce: <Comparador> --> COMP_DISTINTO\n\n");
+        }
         ; 
 
 iteracion:
@@ -303,13 +460,13 @@ expresion:
                 printf("                El analizador sintactico reconoce: <Expresion> --> <Termino>\n\n");}
     | expresion OP_SUM termino {
                 ExpresionInd = agregarTerceto("+",formatear(ExpresionInd), formatear(TerminoInd));
-                //printf("   ExpresioncionInd = agregarTerceto(+, %s, %s)\n", aux, aux2);
+                
 
                 
                 printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_SUM <Termino>\n\n");}
     | expresion OP_RES termino {
                 ExpresionInd = agregarTerceto("-",formatear(ExpresionInd), formatear(TerminoInd));
-                //printf("   ExpresioncionInd = agregarTerceto(-, %s, %s)\n", aux, aux2);
+                
                 printf("                El analizador sintactico reconoce: <Expresion> --> <Expresion> OP_RES <Termino>\n\n");}
     ;
 
@@ -429,11 +586,22 @@ int yyerror(void)
 }
 
 char* formatear(int indice) {
-    static char aux_corchetes[25]; // Mantiene la memoria válida
+    char* aux_corchetes = malloc(25); // Reserva memoria dinámica
     char aux[20];
 
     itoa(indice, aux, 10); // Convierte el índice a cadena
     sprintf(aux_corchetes, "[%s]", aux); // Formatea con corchetes
 
-    return aux_corchetes; // Devuelve el puntero a la cadena estática
+    return aux_corchetes; // Devuelve el puntero a la cadena dinámica
+}
+
+
+char* formatearComparador(char* comparador) {
+    if (strcmp(comparador, "<") == 0) return "BGE";
+    if (strcmp(comparador, ">") == 0) return "BLE";
+    if (strcmp(comparador, "=") == 0) return "BNE";
+    if (strcmp(comparador, "!") == 0) return "BEQ";
+    if (strcmp(comparador, "<=") == 0) return "BGT";
+    if (strcmp(comparador, ">=") == 0) return "BLT";
+    return "Invalid comparator";
 }

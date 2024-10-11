@@ -10,11 +10,18 @@ typedef struct {
     char operadorDer[50];      
 }terceto;
 
+typedef struct {
+    int indiceBuscado;      // Índice del terceto que quieres actualizar
+    char nuevoOperadorIzq[20];   // Nuevo valor para el operador izquierdo
+} DatosAccion;
 
 // Función para agregar un símbolo a la tabla
 int agregarTerceto(char *operando , char *operadorIzq, char *operadorDer);
 
 // Función para guardar la tabla de símbolos en un archivo
 void guardarTercetos(const char *filename);
+
+void actualizarTerceto(int indiceBuscado, const char* nuevoOperadorIzq);
+void actualizarTercetoInver(int indiceBuscado);
 
 #endif  

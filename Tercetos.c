@@ -8,7 +8,8 @@ Lista lista_tercetos;
 int lista_inicializada_tercetos = 0;
 int indice;
 
-int compa(const void* e1, const void* e2);
+void actualizarOperadorIzq(void* tercetoVoid, void* datosAccion);
+void invertirOperador(void* tercetoVoid, void* datosAccion);
 
 int agregarTerceto(char *operando , char *operadorIzq, char *operadorDer) 
 {    
@@ -74,4 +75,54 @@ void guardarTercetos(const char *filename) {
 
     fclose(file);
     printf("Codigo intermedio guardado en en %s\n", filename);
+}
+
+void actualizarTerceto(int indiceBuscado, const char* nuevoOperadorIzq) {
+    DatosAccion datos;
+    datos.indiceBuscado = indiceBuscado;
+    strncpy(datos.nuevoOperadorIzq, nuevoOperadorIzq, sizeof(datos.nuevoOperadorIzq) - 1);
+    datos.nuevoOperadorIzq[sizeof(datos.nuevoOperadorIzq) - 1] = '\0'; // Asegura la terminación de la cadena
+
+    recorrerLista(&lista_tercetos, actualizarOperadorIzq, &datos);
+}
+
+void actualizarOperadorIzq(void* tercetoVoid, void* datosAccion) {
+    terceto* t = (terceto*)tercetoVoid; 
+    DatosAccion* datos = (DatosAccion*)datosAccion;
+
+    // Compara el índice del terceto con el índice buscado
+    if (t->indice == datos->indiceBuscado) {
+        // Actualiza el operador izquierdo
+        strncpy(t->operadorIzq, datos->nuevoOperadorIzq, sizeof(t->operadorIzq) - 1);
+        t->operadorIzq[sizeof(t->operadorIzq) - 1] = '\0'; // Asegura la terminación de la cadena
+    }
+}
+
+void actualizarTercetoInver(int indiceBuscado) {
+    recorrerLista(&lista_tercetos, invertirOperador, &indiceBuscado);
+}
+
+void invertirOperador(void* tercetoVoid, void* datosAccion) {
+    terceto* t = (terceto*)tercetoVoid; 
+    int* indiceBuscado = (int*)datosAccion; // Corregir el casting
+
+    // Compara el índice del terceto con el índice buscado
+    if (t->indice == *indiceBuscado) {
+        // Invertir el operador izquierdo
+        if (strcmp(t->operando, "BGE") == 0) 
+            strncpy(t->operando, "BLT", sizeof(t->operando) - 1);
+        else if (strcmp(t->operando, "BLE") == 0) 
+            strncpy(t->operando, "BGT", sizeof(t->operando) - 1);
+        else if (strcmp(t->operando, "BNE") == 0) 
+            strncpy(t->operando, "BEQ", sizeof(t->operando) - 1);
+        else if (strcmp(t->operando, "BEQ") == 0) 
+            strncpy(t->operando, "BNE", sizeof(t->operando) - 1);
+        else if (strcmp(t->operando, "BGT") == 0) 
+            strncpy(t->operando, "BLE", sizeof(t->operando) - 1);
+        else if (strcmp(t->operando, "BLT") == 0) 
+            strncpy(t->operando, "BGE", sizeof(t->operando) - 1);
+        
+        // Asegura la terminación de la cadena
+        t->operando[sizeof(t->operando) - 1] = '\0'; 
+    }
 }
