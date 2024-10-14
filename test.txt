@@ -4,29 +4,99 @@ init
 
     int1, int2, int3, int4, int5 : Int
 
+    float1, float2, float3: Float
+
+    string1, string2: String
+
 }
  
-si (NOT a < 4)
+int1 := 1
 
-{
+float1 := 1.5
 
-    a := 8
-    b := 8
+float2 := .5
 
-}
+string1 := "Soy una cadena"
+ 
+*- Verificacion de cotas para un entero de 16 bits-*
 
-sino
-{
-    b := 8
-    a := 8
-}
+int2 := -32768
 
+int3 := 65535
+ 
+ 
+*- Testeamos operaciones aritmeticas -*
+ 
+int1 := 2 + 4
+
+int2 := int1 - 1
+
+int3 := -1--3
+
+int4 := int3 * -1
+
+int5 := 1 + (2*3)
+
+float3 := float1 / float2
+
+string1 := "Esta cadena tiene exacto: 40 caracteres."
+ 
+leer(string2)
+
+escribir(string1)
+
+escribir("Hola")
+ 
 si (int1 > int2 AND int3 > int4)
 
 {
 
-    a := 8
+    escribir("Se cumple la condicion.")
 
 }
 
+sino{
 
+	escribir("No se cumple la condicion.")
+
+}
+ 
+si (int2 > int3 OR int4 > int1)
+
+{
+
+    escribir("Ok.")
+
+}
+ 
+ 
+mientras (NOT int4 > int5)
+
+{
+
+    escribir("int4 es menor que int5")
+
+    int4 := int4 + 1
+
+}
+ 
+mientras (NOT int1 > int2)
+{
+
+    	escribir("int2 es mas grande que int1")
+
+	mientras (int1 > int3)
+
+	{
+
+        	int1 := int1 + 1
+
+	}
+
+}
+ 
+*- Testeamos las funciones especiales -*
+
+string2 := triangulo(5, 1+1, float1)
+int3 := binaryCount([0b110,1,0,5,string2,0b10101100,-1])
+ 
