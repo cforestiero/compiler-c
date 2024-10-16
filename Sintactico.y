@@ -103,7 +103,12 @@ Lista ListaExpresiones;
 %%
 
 programa:
-        init bloque {
+        init {
+                crearLista(&ListaComparaciones);
+                crearLista(&ListaComparadores);
+                crearLista(&ListaCondicionesTipo);
+        }
+        bloque {
                 printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
                 guardarTercetos(nombre_archivo_tercetos);
@@ -201,6 +206,11 @@ sentencia:
 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <lectura>\n\n");
         }
+        | iteracion {
+                SentenciaInd = IteracionInd;
+
+                printf("                El analizador sintactico reconoce: <Sentencia> --> <iteracions>\n\n");
+        }
         ;
 
 asignacion:
@@ -271,12 +281,7 @@ asignacion:
         ;
 
 seleccion:
-        SI PAR_A {
-                crearLista(&ListaComparaciones);
-                crearLista(&ListaComparadores);
-                crearLista(&ListaCondicionesTipo);
-        }
-        condicion PAR_C LLAVE_A bloque LLAVE_C seleccion_sino
+        SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C seleccion_sino
         
         ;
 
@@ -423,6 +428,7 @@ comparacion:
                 char auxComparador[2];
                 verUltimoLista(&ListaComparadores, auxComparador, sizeof(auxComparador));
                 ComparacionInd = agregarTerceto(formatearComparador(auxComparador), "_", "_");
+
                 eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
 
                 insertarListaAlFinal(&ListaComparaciones, &ComparacionInd, sizeof(ComparacionInd));
@@ -457,7 +463,60 @@ comparador:
         ; 
 
 iteracion:
-        MIENTRAS PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Iteracion> --> MIENTRAS PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C \n\n");}
+        MIENTRAS PAR_A {
+                int aux_etiqueta_while = agregarTerceto("ETIQUETA_INCIO_WHILE","_","_");
+                insertarListaAlFinal(&ListaComparaciones, &aux_etiqueta_while, sizeof(aux_etiqueta_while));
+
+        }
+        condicion PAR_C LLAVE_A bloque {
+                int auxCompracion;
+                eliminarUltimo(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
+
+                int auxIndice, auxIndice2;
+                int aux_etiqueta_while;
+
+                switch(auxCompracion){
+                        case 1:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                break;
+                        case 2:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice2, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                actualizarTerceto(auxIndice2,formatear(IteracionInd + 1));
+
+                                break;
+                        case 3:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice2, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                actualizarTercetoInver(auxIndice2);
+                                actualizarTerceto(auxIndice2,formatear(auxIndice+1));
+
+                                break;
+                        case 4:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                break;
+                } 
+
+        }
+        LLAVE_C {printf("                El analizador sintactico reconoce: <Iteracion> --> MIENTRAS PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C \n\n");}
         ;
 
 escritura:
@@ -636,6 +695,7 @@ elemento:
         ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
                 //ElementoInd = agregarTerceto($1, "_", "_");
+                //aca habria que validar si es binario en tabla de simbolos
         }
         | CTE_ENTERA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_ENTERA\n\n");
