@@ -1,10 +1,10 @@
 NOMBRE                                             | TIPODATO                  | VALOR                                         | LONGITUD  
 --------------------------------------------------------------------------------------------------------------------------------------------
-1                                                  |                           | 1                                             |           
+No se cumple.                                      |                           | No se cumple.                                 | 13        
+Ok.                                                |                           | Ok.                                           | 3         
+Se cumple la condicion.                            |                           | Se cumple la condicion.                       | 23        
 int1                                               | Int                       |                                               |           
 int2                                               | Int                       |                                               |           
-int2 es mas grande que int1                        |                           | int2 es mas grande que int1                   | 27        
 int3                                               | Int                       |                                               |           
 int4                                               | Int                       |                                               |           
-int4 es menor que int5                             |                           | int4 es menor que int5                        | 22        
 int5                                               | Int                       |                                               |           

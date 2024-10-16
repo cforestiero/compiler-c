@@ -187,7 +187,7 @@ sentencia:
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <asignacion>\n\n");
         }
         | iteracion {
-                SentenciaInd = AsignacionInd;
+                SentenciaInd = IteracionInd;
 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <iteracion>\n\n");
         }
@@ -205,11 +205,6 @@ sentencia:
                 SentenciaInd = LecturaInd;
 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <lectura>\n\n");
-        }
-        | iteracion {
-                SentenciaInd = IteracionInd;
-
-                printf("                El analizador sintactico reconoce: <Sentencia> --> <iteracions>\n\n");
         }
         ;
 

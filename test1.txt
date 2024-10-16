@@ -4,49 +4,7 @@ init
 
     int1, int2, int3, int4, int5 : Int
 
-    float1, float2, float3: Float
-
-    string1: String
-
 }
- 
-int1 := 1
-
-float1 := 1.5
-
-float2 := .5
-
-string1 := "Soy una cadena"
- 
-*- Verificacion de cotas para un entero de 16 bits-*
-
-int2 := -32768
-
-int3 := 65535
- 
- 
-*- Testeamos operaciones aritmeticas -*
- 
-int1 := 2 + 4
-
-int2 := a1 - 1
-
-int3 := -1--3
-
-int4 := int3 * -1
-
-int5 := 1 + (2*3)
-
-float3 := float1 / float2
-
-string1 := "Esta cadena tiene exacto: 40 caracteres."
- 
-leer(string1)
-
-escribir(string1)
-
-escribir("Hola")
- 
 si (int1 > int2 AND int3 > int4)
 
 {
@@ -69,7 +27,3 @@ si (int1 > int2 OR int4 > int3)
 
 }
  
-*- Testeamos las funciones especiales -*
-
-string1 := triangulo(5, 1+1, float1)
-int3 := binaryCount([0b110,1,0,5,int1,0b10101100,-1])
