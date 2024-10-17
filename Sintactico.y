@@ -37,7 +37,6 @@ int TrianguloInd;
 int Xind;
 int ComparacionInd;
 
-int contBinarios = 0;
 int CondicionTipo;
 
 int listaCreada = 0;
@@ -253,10 +252,7 @@ asignacion:
                      exit(1);   
                 }
 
-                char cantBinarios[6];
-                sprintf(cantBinarios, "%d", contBinarios);
-                AsignacionInd = agregarTerceto(":=", $1, cantBinarios);
-                contBinarios = 0;
+                AsignacionInd = agregarTerceto(":=", $1, "@cantBinarios");
         }
 
         | ID OP_ASIG CTE_CADENA {
@@ -459,7 +455,7 @@ comparador:
 
 iteracion:
         MIENTRAS PAR_A {
-                int aux_etiqueta_while = agregarTerceto("ETIQUETA_INCIO_WHILE","_","_");
+                int aux_etiqueta_while = agregarTerceto("ETIQUETA_INICIO_WHILE","_","_");
                 insertarListaAlFinal(&ListaComparaciones, &aux_etiqueta_while, sizeof(aux_etiqueta_while));
 
         }
@@ -517,6 +513,7 @@ iteracion:
 escritura:
         ESCRIBIR PAR_A salida PAR_C {
                 printf("                El analizador sintactico reconoce: <Escritura> --> ESCRIBIR PAR_A <Salida> PAR_C\n\n");
+                
                 EscrituraInd= agregarTerceto("ESCRIBIR",formatear(SalidaInd),"_");
         }
         ;
@@ -653,35 +650,48 @@ funcion_triangulo:
                 agregarTerceto("BI",formatear(TrianguloInd+15),"_");
                 
                 TrianguloInd = agregarTerceto(":=","@resultado","Escaleno");
+
+                agregarSimbolo("@resultado","String","","");
+                agregarSimbolo("Equilatero","","Equilatero","10");
+                agregarSimbolo("Isosceles","","Isosceles","9");
+                agregarSimbolo("Escaleno","","Escaleno","8");
         }
         ;
 
 lista_parametros:
         expresion {
                 agregarTerceto(":=","@lado1",formatear(ExpresionInd));
+                agregarSimbolo("@lado1","Float","","");
         }
         COMA expresion {
                 agregarTerceto(":=","@lado2",formatear(ExpresionInd));
+                agregarSimbolo("@lado2","Float","","");
         }
         COMA expresion { 
                 agregarTerceto(":=","@lado3",formatear(ExpresionInd));
+                agregarSimbolo("@lado3","Float","","");
                 printf("                El analizador sintactico reconoce: <Lista_parametros> --> <Expresion> COMA <Expresion> COMA <Expresion>\n\n");
         }
         ;
 
 funcion_binaryCount:
-        BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {
+        BINARYCOUNT 
+        {
+              agregarTerceto(":=","@contBinarios", "0");  
+              agregarSimbolo("@contBinarios","Int","","");
+        }
+        PAR_A CORCHETE_A lista CORCHETE_C PAR_C {
                 printf("                El analizador sintactico reconoce: <Funcion_binaryCount> --> BINARYCOUNT PAR_A CORCHETE_A <Lista> CORCHETE_C PAR_C\n\n");
         }
         ;
 
 lista:
         elemento {
-                //ListaInd = ElementoInd;
+                
                 printf("                El analizador sintactico reconoce: <Lista> --> <Elemento>\n\n");
         }
         | lista COMA elemento {
-                //ListaInd = agregarTerceto(",", formatear(ListaInd), formatear(ElementoInd));
+                
                 printf("                El analizador sintactico reconoce: <Lista> --> <Lista> COMA <Elemento>\n\n");
         }
         ;
@@ -689,21 +699,26 @@ lista:
 elemento:
         ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
-                //ElementoInd = agregarTerceto($1, "_", "_");
-                //aca habria que validar si es binario en tabla de simbolos
+                ElementoInd = agregarTerceto($1, "_", "_");
+                ElementoInd = agregarTerceto("CMP",formatear(ElementoInd),"es_binario");
+                agregarTerceto("BNE",formatear(ElementoInd+4),"_");
+                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
+                agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
+
+                
         }
         | CTE_ENTERA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_ENTERA\n\n");
-                //ElementoInd = agregarTerceto($1, "_", "_");
+                
         }
         | CTE_REAL {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_REAL\n\n");
-                //ElementoInd = agregarTerceto($1, "_", "_");
+              
         }
         | CTE_BINARIA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_BINARIA\n\n");
-                //ElementoInd = agregarTerceto("CTE_BINARIA", "_", "_");
-                contBinarios++;
+                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
+                agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
         }
         ;
 

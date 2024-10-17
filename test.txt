@@ -98,5 +98,5 @@ mientras (NOT int1 > int2)
 *- Testeamos las funciones especiales -*
 
 string2 := triangulo(5, 1+1, float1)
-int3 := binaryCount([0b110,1,0,5,string2,0b10101100,-1])
+int3 := binaryCount([0b110,5,0,int1,int4,0b10101100,-1])
  
