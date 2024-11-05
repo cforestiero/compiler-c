@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "y.tab.h"
 #include "Lista.h"
 #include "symbol_table.h"
@@ -14,9 +15,12 @@ int yyerror();
 int yylex();
 char* formatear(int indice);
 char* formatearComparador(char* comparador);
+void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
+void trim(char *str);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
+char* nombre_archivo_asm = "final.asm";
 
 int AsignacionInd;
 int ExpresionInd;
@@ -111,6 +115,7 @@ programa:
                 printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
                 guardarTercetos(nombre_archivo_tercetos);
+                generar_assemblr(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
                 PorgramaInd = BloqueInd;
         }
         ;
@@ -767,3 +772,110 @@ char* formatearComparador(char* comparador) {
     if (strcmp(comparador, ">=") == 0) return "BLT";
     return "Invalid comparator";
 }
+
+// Función para eliminar los espacios en blanco al principio y al final de una cadena
+void trim(char *str) {
+    // Eliminar los espacios al principio
+    while (*str && *str == ' ') {
+        str++; // Mueve el puntero hacia la derecha, saltando los espacios al principio
+    }
+
+    // Si la cadena está vacía, no hace falta continuar
+    if (*str == '\0') return;
+
+    // Eliminar los espacios al final
+    char *end = str + strlen(str) - 1; // Puntero al último carácter de la cadena
+    while (end > str && *end == ' ') {
+        end--; // Mueve el puntero hacia la izquierda, saltando los espacios al final
+    }
+
+    // Colocar el carácter de fin de cadena después del último carácter no blanco
+    *(end + 1) = '\0';
+}
+
+void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
+   
+    FILE *fileASM = fopen(nombre_archivo_asm, "w");
+
+    if (fileASM == NULL) {
+        printf("Error al intentar guardar el codigo assemblr en archivo %s.", nombre_archivo_asm);
+        return;
+    }
+    FILE *fileTabla = fopen(nombre_archivo_tabla, "r");
+    if (fileTabla == NULL) {
+        printf("Error al intentar abrir el archivo %s para leer la tabla de símbolos.\n", nombre_archivo_tabla);
+        return;
+    }
+
+    fprintf(fileASM, ".MODEL LARGE\n");
+    fprintf(fileASM, ".386\n");
+    fprintf(fileASM, ".STACK 200h\n");
+    fprintf(fileASM, ".DATA\n");
+
+    //gerar data
+    char line[300]; // Para leer cada línea del archivo
+    fgets(line, sizeof(line), fileTabla); // Leer y omitir la primera línea de encabezado
+    fgets(line, sizeof(line), fileTabla); // Leer y omitir la segunda línea de encabezado
+
+        
+    // Leer cada línea que contiene un símbolo
+    while (fgets(line, sizeof(line), fileTabla) != NULL) {
+        char nombre[50], tipo_de_dato[25], valor[45], longitud[10];
+
+        // Usar strtok para separar la línea por el delimitador '|'
+        char *token = strtok(line, "|");
+        if (token != NULL) {
+            strncpy(nombre, token, sizeof(nombre) - 1);  // Copiar el primer valor (nombre)
+            trim(nombre); // Limpiar los espacios
+        }
+
+        token = strtok(NULL, "|");
+        if (token != NULL) {
+            strncpy(tipo_de_dato, token, sizeof(tipo_de_dato) - 1); // Copiar el segundo valor (tipo de dato)
+            trim(tipo_de_dato); // Limpiar los espacios
+        }
+
+        token = strtok(NULL, "|");
+        if (token != NULL) {
+            strncpy(valor, token, sizeof(valor) - 1);  // Copiar el tercer valor (valor)
+            trim(valor);  // Limpiar los espacios
+        }
+
+        token = strtok(NULL, "|");
+        if (token != NULL) {
+            strncpy(longitud, token, sizeof(longitud) - 1);  // Copiar el cuarto valor (longitud)
+            trim(longitud);  // Limpiar los espacios
+        }
+
+        // Limpiar espacios de los campos
+        trim(nombre);
+        trim(tipo_de_dato);
+        trim(valor);
+        trim(longitud);
+
+        printf("%s | %s | %s | %s\n", nombre, tipo_de_dato, valor, longitud);
+        if (strlen(valor) > 0 && strcmp(valor, "NULL") != 0) {
+                fprintf(fileASM, "_cte_%s  dd      %s\n", nombre, valor);
+        } else {
+                fprintf(fileASM, "%s       dd      ?\n", nombre);
+        }
+    }
+
+    fclose(fileTabla);
+
+    fprintf(fileASM, ".CODE\n");
+    fprintf(fileASM, "mov  AX, @data\n");
+    fprintf(fileASM, "mov  DS, AX\n");
+    fprintf(fileASM, "mov  es, ax\n");
+
+    //codigo
+
+    fprintf(fileASM, "mov  ax, 4c00h\n");
+    fprintf(fileASM, "int  21h\n");
+    fprintf(fileASM, "END\n");
+
+
+    fclose(fileASM);
+    printf("El archivo %s ha sido generado.\n", nombre_archivo_asm);
+}
+
