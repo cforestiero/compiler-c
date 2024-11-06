@@ -15,8 +15,9 @@ int yyerror();
 int yylex();
 char* formatear(int indice);
 char* formatearComparador(char* comparador);
+
+void reemplazarEspaciosPorGuionBajo(char* str);
 void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
-void trim(char *str);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
@@ -49,7 +50,6 @@ Lista ListaComparaciones;
 Lista ListaComparadores;
 Lista ListaCondicionesTipo;
 Lista ListaExpresiones;
-
 
 %}
 
@@ -113,9 +113,11 @@ programa:
         }
         bloque {
                 printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
+                
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
                 guardarTercetos(nombre_archivo_tercetos);
                 generar_assemblr(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
+                
                 PorgramaInd = BloqueInd;
         }
         ;
@@ -143,9 +145,9 @@ bloque_declaracion:
 
 declaracion:
         lista_de_variables DOS_PUNTOS tipo_de_dato {
-                char aux[sizeof(char[300])] ;
+                char aux[sizeof(char[500])] ;
                 while (!listaVacia(&ListaAignaciones)) {
-                        eliminarPrimero(&ListaAignaciones, aux, sizeof(char[300]));
+                        eliminarPrimero(&ListaAignaciones, aux, sizeof(char[500]));
                         if(agregarSimbolo(aux,$3,"","") != TODO_OK) {
                                 exit(1);
                         }          
@@ -157,7 +159,7 @@ declaracion:
 lista_de_variables:
         lista_de_variables COMA ID {
                 
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK){
                         exit(1);
                 }
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
@@ -168,7 +170,7 @@ lista_de_variables:
                         listaCreada = 1;
                 }
               
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[500]), compararArrojandoError) != TODO_OK){
                         exit(1);
                 }
 
@@ -773,24 +775,13 @@ char* formatearComparador(char* comparador) {
     return "Invalid comparator";
 }
 
-// Función para eliminar los espacios en blanco al principio y al final de una cadena
-void trim(char *str) {
-    // Eliminar los espacios al principio
-    while (*str && *str == ' ') {
-        str++; // Mueve el puntero hacia la derecha, saltando los espacios al principio
+void reemplazarEspaciosPorGuionBajo(char* str) {
+    while (*str) {
+        if (*str == ' ') {
+            *str = '_';  // Reemplazamos el espacio por un guion bajo
+        }
+        str++;
     }
-
-    // Si la cadena está vacía, no hace falta continuar
-    if (*str == '\0') return;
-
-    // Eliminar los espacios al final
-    char *end = str + strlen(str) - 1; // Puntero al último carácter de la cadena
-    while (end > str && *end == ' ') {
-        end--; // Mueve el puntero hacia la izquierda, saltando los espacios al final
-    }
-
-    // Colocar el carácter de fin de cadena después del último carácter no blanco
-    *(end + 1) = '\0';
 }
 
 void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
@@ -801,74 +792,121 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
         printf("Error al intentar guardar el codigo assemblr en archivo %s.", nombre_archivo_asm);
         return;
     }
-    FILE *fileTabla = fopen(nombre_archivo_tabla, "r");
-    if (fileTabla == NULL) {
-        printf("Error al intentar abrir el archivo %s para leer la tabla de símbolos.\n", nombre_archivo_tabla);
-        return;
-    }
 
     fprintf(fileASM, ".MODEL LARGE\n");
     fprintf(fileASM, ".386\n");
     fprintf(fileASM, ".STACK 200h\n");
-    fprintf(fileASM, ".DATA\n");
+    fprintf(fileASM, "\n.DATA\n");
 
-    //gerar data
-    char line[300]; // Para leer cada línea del archivo
-    fgets(line, sizeof(line), fileTabla); // Leer y omitir la primera línea de encabezado
-    fgets(line, sizeof(line), fileTabla); // Leer y omitir la segunda línea de encabezado
+    Lista dataLista = NULL;
+    crearLista(&dataLista);
+    copiarTablaDeSimbolos(&dataLista);
 
+    Nodo* current = dataLista;  // Aquí 'data' es de tipo Lista (puntero a Nodo)
+
+    while (current != NULL) {
+        simbolo* _simbolo = (simbolo*)current->dato;  // Obtener el símbolo desde el nodo
+
+        // Escribir los datos del símbolo en el archivo
+        if (_simbolo->valor[0] == '\0') {  // Si el valor está vacío
+                if(strcmp(_simbolo->tipo_de_dato, "String") == 0) {
+                        fprintf(fileASM, "%s\t\tdb 256 dup (?)\n", _simbolo->nombre); //ids
+                } else {
+                        fprintf(fileASM, "%s\t\tdd\t\t?\n", _simbolo->nombre); //ids
+                }
+        } else {                                                        //ctes
+                if(_simbolo->longitud[0] != '\0'){                          //tiene longitud ==> es cadena
+                        reemplazarEspaciosPorGuionBajo(_simbolo->nombre);
+                        fprintf(fileASM, "_cte_%s\t\tdb\t\t\"%s\",'$', 3 dup (?)\n", _simbolo->nombre, _simbolo->valor);
+                } else {   //no cadena
+                        if(strchr(_simbolo->valor, '.') == NULL){             //es int 
+                                if(_simbolo->valor[1] == 'b') {                 //es binario  
+                                        fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t%s\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                }
+                                else {
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s.0\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                }                               
+                        } else{
+                                if(_simbolo->valor[0] == '.') {// .5 ==> agrego cero ==> 0.5
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
+                                }
+                                else {
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
+                                }
+                        }
+                }
+        }
         
-    // Leer cada línea que contiene un símbolo
-    while (fgets(line, sizeof(line), fileTabla) != NULL) {
-        char nombre[50], tipo_de_dato[25], valor[45], longitud[10];
-
-        // Usar strtok para separar la línea por el delimitador '|'
-        char *token = strtok(line, "|");
-        if (token != NULL) {
-            strncpy(nombre, token, sizeof(nombre) - 1);  // Copiar el primer valor (nombre)
-            trim(nombre); // Limpiar los espacios
-        }
-
-        token = strtok(NULL, "|");
-        if (token != NULL) {
-            strncpy(tipo_de_dato, token, sizeof(tipo_de_dato) - 1); // Copiar el segundo valor (tipo de dato)
-            trim(tipo_de_dato); // Limpiar los espacios
-        }
-
-        token = strtok(NULL, "|");
-        if (token != NULL) {
-            strncpy(valor, token, sizeof(valor) - 1);  // Copiar el tercer valor (valor)
-            trim(valor);  // Limpiar los espacios
-        }
-
-        token = strtok(NULL, "|");
-        if (token != NULL) {
-            strncpy(longitud, token, sizeof(longitud) - 1);  // Copiar el cuarto valor (longitud)
-            trim(longitud);  // Limpiar los espacios
-        }
-
-        // Limpiar espacios de los campos
-        trim(nombre);
-        trim(tipo_de_dato);
-        trim(valor);
-        trim(longitud);
-
-        printf("%s | %s | %s | %s\n", nombre, tipo_de_dato, valor, longitud);
-        if (strlen(valor) > 0 && strcmp(valor, "NULL") != 0) {
-                fprintf(fileASM, "_cte_%s  dd      %s\n", nombre, valor);
-        } else {
-                fprintf(fileASM, "%s       dd      ?\n", nombre);
-        }
+        // Avanzar al siguiente nodo
+        current = current->sig;
     }
 
-    fclose(fileTabla);
-
-    fprintf(fileASM, ".CODE\n");
+    fprintf(fileASM, "\n.CODE\n");
     fprintf(fileASM, "mov  AX, @data\n");
     fprintf(fileASM, "mov  DS, AX\n");
     fprintf(fileASM, "mov  es, ax\n");
 
-    //codigo
+    Lista codigoLista = NULL;
+    crearLista(&codigoLista);
+    copiarListaDeTercetos(&codigoLista);
+
+    current = codigoLista; 
+
+    while (current != NULL) {
+        terceto* _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
+
+        if (strcmp(_terceto->operando, "+") == 0) {
+        // Código para la suma
+        } 
+        else if (strcmp(_terceto->operando, "-") == 0) {
+        // Código para la resta
+        } 
+        else if (strcmp(_terceto->operando, "*") == 0) {
+        // Código para la multiplicación
+        } 
+        else if (strcmp(_terceto->operando, "/") == 0) {
+        // Código para la división
+        } 
+        else if (strcmp(_terceto->operando, ":=") == 0) {
+        // Código para asignación
+        } 
+        else if (strcmp(_terceto->operando, "LEER") == 0) {
+        // Código para leer
+        } 
+        else if (strcmp(_terceto->operando, "ESCRIBIR") == 0) {
+        // Código para escribir
+        } 
+        else if (strcmp(_terceto->operando, "CMP") == 0) {
+        // Código para comparación
+        } 
+        else if (strcmp(_terceto->operando, "BGE") == 0) {
+        // Código para "BGE"
+        } 
+        else if (strcmp(_terceto->operando, "BGT") == 0) {
+        // Código para "BGT"
+        } 
+        else if (strcmp(_terceto->operando, "BLE") == 0) {
+        // Código para "BLE"
+        } 
+        else if (strcmp(_terceto->operando, "BLT") == 0) {
+        // Código para "BLT"
+        } 
+        else if (strcmp(_terceto->operando, "BEQ") == 0) {
+        // Código para "BEQ"
+        } 
+        else if (strcmp(_terceto->operando, "BNE") == 0) {
+        // Código para "BNE"
+        } 
+        else if (strcmp(_terceto->operando, "BI") == 0) {
+        // Código para "BI"
+        } 
+        else {
+        // Aca va el código por defecto para etiquetas y apilaciones
+        }
+
+        // Avanzar al siguiente nodo
+        current = current->sig;
+    }
 
     fprintf(fileASM, "mov  ax, 4c00h\n");
     fprintf(fileASM, "int  21h\n");

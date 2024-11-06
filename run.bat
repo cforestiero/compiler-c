@@ -6,7 +6,7 @@ bison -dyv Sintactico.y
 gcc.exe lex.yy.c y.tab.c symbol_table.c Tercetos.c Lista.c -o compilador.exe
 
 
-compilador.exe test1.txt
+compilador.exe test.txt
 
 @echo off
 del compilador.exe

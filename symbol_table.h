@@ -4,6 +4,8 @@
 #define TODO_OK 0
 #define ERROR 1
 
+#include "Lista.h" 
+
 // Estructura para representar un símbolo en la tabla
 
 typedef struct {
@@ -32,5 +34,6 @@ int esBinario(char *valor);
 int validarVariableDeclarada(char* nombre);
 
 int compararArrojandoError(const void *e1, const void *e2);
+int copiarTablaDeSimbolos(Lista* lista_externa);
 
 #endif  
