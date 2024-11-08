@@ -1,6 +1,8 @@
 #ifndef TERCETOS_H
 #define TERCETOS_H
 
+#include "Lista.h" 
+
 // Estructura para representar un símbolo en la tabla
 
 typedef struct {
@@ -23,5 +25,6 @@ void guardarTercetos(const char *filename);
 
 void actualizarTerceto(int indiceBuscado, const char* nuevoOperadorIzq);
 void actualizarTercetoInver(int indiceBuscado);
+int copiarListaDeTercetos(Lista* lista_externa);
 
 #endif  
