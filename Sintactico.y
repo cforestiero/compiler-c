@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "y.tab.h"
 #include "Lista.h"
 #include "symbol_table.h"
@@ -15,21 +16,19 @@ int yylex();
 char* formatear(int indice);
 char* formatearComparador(char* comparador);
 
+void reemplazarEspaciosPorGuionBajo(char* str);
+void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
+
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
+char* nombre_archivo_asm = "final.asm";
 
 int AsignacionInd;
 int ExpresionInd;
 int TerminoInd;
 int FactorInd;
-int ListaVarInd;
-int TipoDatoInd;
-int DeclaracionInd;
-int BloqueDeclaracionInd;
 int PorgramaInd;
 int BloqueInd;
-int InitInd;
-int BloqueSentenciaInd;
 int SentenciaInd;
 int ElementoInd;
 int ListaInd;
@@ -39,14 +38,10 @@ int EscrituraInd;
 int LecturaInd;
 int EntradaInd;
 int SalidaInd;
-int BinaryCountInd;
 int TrianguloInd;
 int Xind;
-int CondicionInd;
 int ComparacionInd;
-int SeleccionSinoInd;
 
-int cont=0;
 int CondicionTipo;
 
 int listaCreada = 0;
@@ -54,7 +49,7 @@ Lista ListaAignaciones;
 Lista ListaComparaciones;
 Lista ListaComparadores;
 Lista ListaCondicionesTipo;
-
+Lista ListaExpresiones;
 
 %}
 
@@ -111,10 +106,20 @@ Lista ListaCondicionesTipo;
 %%
 
 programa:
-        init bloque {
+        init {
+                crearLista(&ListaComparaciones);
+                crearLista(&ListaComparadores);
+                crearLista(&ListaCondicionesTipo);
+        }
+        bloque {
                 printf("                El analizador sintactico reconoce a: <Programa> --> <Init> <Bloque>\n\n");
+                
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
-                guardarTercetos(nombre_archivo_tercetos);}
+                guardarTercetos(nombre_archivo_tercetos);
+                generar_assemblr(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
+                
+                PorgramaInd = BloqueInd;
+        }
         ;
 
 bloque:
@@ -128,32 +133,24 @@ bloque:
 
 init:
         INIT LLAVE_A bloque_declaracion LLAVE_C {
-                InitInd = BloqueDeclaracionInd;
                 printf("                El analizador sintactico reconoce: <Init> --> INIT LLAVE_A <Bloque_declaracion> LLAVE_C\n\n");}
         ;
 
 bloque_declaracion:
         bloque_declaracion declaracion {   
-                BloqueDeclaracionInd = DeclaracionInd;
-
                 printf("                El analizador sintactico reconoce: <Bloque_declaracion> --> <Bloque_declaracion> <Declaracion> es \n\n");}
         | declaracion {
-                BloqueDeclaracionInd = DeclaracionInd;
-                
                 printf("                El analizador sintactico reconoce: <Bloque_declaracion> --> <Declaracion>\n\n");}
         ;
 
 declaracion:
         lista_de_variables DOS_PUNTOS tipo_de_dato {
-                char aux[sizeof(char[300])] ;
+                char aux[sizeof(char[500])] ;
                 while (!listaVacia(&ListaAignaciones)) {
-                        eliminarPrimero(&ListaAignaciones, aux, sizeof(char[300]));
-                        //printf("\n\n\nQuiero insertar este tipo de dato %s a la tabla\n\n\n",$3);
-
+                        eliminarPrimero(&ListaAignaciones, aux, sizeof(char[500]));
                         if(agregarSimbolo(aux,$3,"","") != TODO_OK) {
                                 exit(1);
-                        }   
-                        DeclaracionInd = agregarTerceto(":", aux, formatear(TipoDatoInd));        
+                        }          
                 }
            
                 printf("                El analizador sintactico reconoce: <Declaracion> --> <Lista_de_variables> DOS_PUNTOS <Tipo_de_dato>\n\n");}
@@ -161,19 +158,19 @@ declaracion:
 
 lista_de_variables:
         lista_de_variables COMA ID {
-                //printf("\n\n\nQuiero insertar %s a la lista\n\n\n",$3);
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+                
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK){
                         exit(1);
                 }
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
         | ID {
                 if(!listaCreada){
-                        //printf("\n\n\nEntre a crear la lista\n\n\n");
+                        
                         crearLista(&ListaAignaciones);
                         listaCreada = 1;
                 }
-                //printf("\n\n\nQuiero insertar %s a la lista\n\n\n",$1);
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[300]), compararArrojandoError) != TODO_OK){
+              
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[500]), compararArrojandoError) != TODO_OK){
                         exit(1);
                 }
 
@@ -181,17 +178,11 @@ lista_de_variables:
         ;
 
 tipo_de_dato:
-        INT {
-                TipoDatoInd = agregarTerceto("Int", "_", "_");
-                               
+        INT {                       
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> INT\n\n");}
         | FLOAT {
-                TipoDatoInd = agregarTerceto("Float", "_", "_");
-                
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> FLOAT\n\n");}
-        | STRING {
-                TipoDatoInd = agregarTerceto("String", "_", "_");
-                
+        | STRING { 
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> STRING\n\n");}
         ;
 
@@ -202,7 +193,7 @@ sentencia:
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <asignacion>\n\n");
         }
         | iteracion {
-                SentenciaInd = AsignacionInd;
+                SentenciaInd = IteracionInd;
 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <iteracion>\n\n");
         }
@@ -220,7 +211,7 @@ sentencia:
                 SentenciaInd = LecturaInd;
 
                 printf("                El analizador sintactico reconoce: <Sentencia> --> <lectura>\n\n");
-}
+        }
         ;
 
 asignacion:
@@ -238,7 +229,7 @@ asignacion:
                 AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresionInd));
                 
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
-                        }
+        }
 
         | ID OP_ASIG funcion_triangulo {
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_triangulo>\n");
@@ -253,8 +244,9 @@ asignacion:
                      exit(1);   
                 }
 
-                AsignacionInd = agregarTerceto(":=", $1, formatear(TrianguloInd));
-                }
+                AsignacionInd = agregarTerceto(":=", $1, "@resultado");
+        }
+
         | ID OP_ASIG funcion_binaryCount {
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <funcion_binaryCount>\n");
                 if(validarVariableDeclarada($1) != TODO_OK){
@@ -266,8 +258,10 @@ asignacion:
                      printf("ERROR SEMANTICO: %s no es del tipo Int, asignacion invalida.\n", $1);
                      exit(1);   
                 }
-                AsignacionInd = agregarTerceto(":=", $1, formatear(BinaryCountInd));
-                }
+
+                AsignacionInd = agregarTerceto(":=", $1, "@cantBinarios");
+        }
+
         | ID OP_ASIG CTE_CADENA {
                 if(validarVariableDeclarada($1) != TODO_OK){
                         exit(1);
@@ -285,12 +279,7 @@ asignacion:
         ;
 
 seleccion:
-        SI PAR_A {
-                crearLista(&ListaComparaciones);
-                crearLista(&ListaComparadores);
-                crearLista(&ListaCondicionesTipo);
-        }
-        condicion PAR_C LLAVE_A bloque LLAVE_C seleccion_sino
+        SI PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C seleccion_sino
         
         ;
 
@@ -437,6 +426,7 @@ comparacion:
                 char auxComparador[2];
                 verUltimoLista(&ListaComparadores, auxComparador, sizeof(auxComparador));
                 ComparacionInd = agregarTerceto(formatearComparador(auxComparador), "_", "_");
+
                 eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
 
                 insertarListaAlFinal(&ListaComparaciones, &ComparacionInd, sizeof(ComparacionInd));
@@ -471,12 +461,66 @@ comparador:
         ; 
 
 iteracion:
-        MIENTRAS PAR_A condicion PAR_C LLAVE_A bloque LLAVE_C {printf("                El analizador sintactico reconoce: <Iteracion> --> MIENTRAS PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C \n\n");}
+        MIENTRAS PAR_A {
+                int aux_etiqueta_while = agregarTerceto("ETIQUETA_INICIO_WHILE","_","_");
+                insertarListaAlFinal(&ListaComparaciones, &aux_etiqueta_while, sizeof(aux_etiqueta_while));
+
+        }
+        condicion PAR_C LLAVE_A bloque {
+                int auxCompracion;
+                eliminarUltimo(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
+
+                int auxIndice, auxIndice2;
+                int aux_etiqueta_while;
+
+                switch(auxCompracion){
+                        case 1:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                break;
+                        case 2:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice2, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                actualizarTerceto(auxIndice2,formatear(IteracionInd + 1));
+
+                                break;
+                        case 3:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &auxIndice2, sizeof(int));
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                actualizarTercetoInver(auxIndice2);
+                                actualizarTerceto(auxIndice2,formatear(auxIndice+1));
+
+                                break;
+                        case 4:
+                                eliminarUltimo(&ListaComparaciones, &auxIndice, sizeof(int));
+                                actualizarTercetoInver(auxIndice);
+                                eliminarUltimo(&ListaComparaciones, &aux_etiqueta_while, sizeof(int));
+
+                                IteracionInd = agregarTerceto("BI",formatear(aux_etiqueta_while),"_");
+                                actualizarTerceto(auxIndice,formatear(IteracionInd + 1));
+                                break;
+                } 
+
+        }
+        LLAVE_C {printf("                El analizador sintactico reconoce: <Iteracion> --> MIENTRAS PAR_A <Condicion> PAR_C LLAVE_A <Bloque> LLAVE_C \n\n");}
         ;
 
 escritura:
         ESCRIBIR PAR_A salida PAR_C {
                 printf("                El analizador sintactico reconoce: <Escritura> --> ESCRIBIR PAR_A <Salida> PAR_C\n\n");
+                
                 EscrituraInd= agregarTerceto("ESCRIBIR",formatear(SalidaInd),"_");
         }
         ;
@@ -552,16 +596,38 @@ factor:
                 FactorInd = agregarTerceto($1, "_", "_"); 
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_ENTERA\n\n");
         }
+
         | CTE_REAL {
                 FactorInd = agregarTerceto($1, "_", "_"); 
                 printf("                El analizador sintactico reconoce: <Factor> --> CTE_REAL\n\n");
         }
-        | PAR_A expresion PAR_C {
+
+        | PAR_A {
+                crearLista(&ListaExpresiones);
+                insertarListaAlFinal(&ListaExpresiones, &ExpresionInd, sizeof(int));
+                insertarListaAlFinal(&ListaExpresiones, &TerminoInd, sizeof(int));
+        }
+        expresion PAR_C {
+                FactorInd = ExpresionInd;
+                eliminarPrimero(&ListaExpresiones, &TerminoInd, sizeof(int));
+                eliminarPrimero(&ListaExpresiones, &ExpresionInd, sizeof(int));
+
                 printf("                El analizador sintactico reconoce: <Factor> --> PAR_A <Expresion> PAR_C\n\n");
         }
-        | OP_RES PAR_A expresion PAR_C %prec MENOS_UNARIO {
+
+        | OP_RES PAR_A {
+                crearLista(&ListaExpresiones);
+                insertarListaAlFinal(&ListaExpresiones, &ExpresionInd, sizeof(int));
+                insertarListaAlFinal(&ListaExpresiones, &TerminoInd, sizeof(int));
+        }
+        expresion PAR_C %prec MENOS_UNARIO {
+                FactorInd = agregarTerceto("-", "0", formatear(ExpresionInd)); 
+                eliminarPrimero(&ListaExpresiones, &TerminoInd, sizeof(int));
+                eliminarPrimero(&ListaExpresiones, &ExpresionInd, sizeof(int));
+
                 printf("                El analizador sintactico reconoce: <Factor> --> -(<Expresion>)\n\n");
         }
+
         | OP_RES ID %prec MENOS_UNARIO {
                 printf("                El analizador sintactico reconoce: <Factor> --> - ID\n\n");
                 FactorInd= agregarTerceto("-","0",$2);
@@ -571,54 +637,68 @@ factor:
 funcion_triangulo:
         TRIANGULO PAR_A lista_parametros PAR_C {
                 printf("                El analizador sintactico reconoce: <Funcion_triangulo> --> TRIANGULO PAR_A <Lista_parametros> PAR_C\n\n");
-                TrianguloInd= agregarTerceto("CMP","lado1","lado2");
+                
+                TrianguloInd = agregarTerceto("CMP","@lado1","@lado2");
                 agregarTerceto("BNE",formatear(TrianguloInd+6),"_");
-                agregarTerceto("CMP","lado2","lado3");
+                agregarTerceto("CMP","@lado2","@lado3");
                 agregarTerceto("BNE",formatear(TrianguloInd+6),"_");
-                agregarTerceto(":=","resultado","Equilatero");
+                agregarTerceto(":=","@resultado","Equilatero");
+
                 agregarTerceto("BI",formatear(TrianguloInd+15),"_");
-                agregarTerceto("CMP","lado1","lado2");
+
+                agregarTerceto("CMP","@lado1","@lado2");
                 agregarTerceto("BEQ",formatear(TrianguloInd+12),"_");
-                agregarTerceto("CMP","lado1","lado3");
+                agregarTerceto("CMP","@lado1","@lado3");
                 agregarTerceto("BEQ",formatear(TrianguloInd+12),"_");
-                agregarTerceto("CMP","lado2","lado3");
+                agregarTerceto("CMP","@lado2","@lado3");
                 agregarTerceto("BNE",formatear(TrianguloInd+14),"_");
-                agregarTerceto(":=","resultado","Isosceles");
+                agregarTerceto(":=","@resultado","Isosceles");
+
                 agregarTerceto("BI",formatear(TrianguloInd+15),"_");
-                agregarTerceto(":=","resultado","Escaleno");
+                
+                TrianguloInd = agregarTerceto(":=","@resultado","Escaleno");
+
+                agregarSimbolo("@resultado","String","","");
+                agregarSimbolo("Equilatero","","Equilatero","10");
+                agregarSimbolo("Isosceles","","Isosceles","9");
+                agregarSimbolo("Escaleno","","Escaleno","8");
         }
         ;
 
 lista_parametros:
         expresion {
-                agregarTerceto(":=","lado1",formatear(ExpresionInd));
+                agregarTerceto(":=","@lado1",formatear(ExpresionInd));
+                agregarSimbolo("@lado1","Float","","");
         }
         COMA expresion {
-                agregarTerceto(":=","lado2",formatear(ExpresionInd));
+                agregarTerceto(":=","@lado2",formatear(ExpresionInd));
+                agregarSimbolo("@lado2","Float","","");
         }
         COMA expresion { 
-                agregarTerceto(":=","lado3",formatear(ExpresionInd));
+                agregarTerceto(":=","@lado3",formatear(ExpresionInd));
+                agregarSimbolo("@lado3","Float","","");
                 printf("                El analizador sintactico reconoce: <Lista_parametros> --> <Expresion> COMA <Expresion> COMA <Expresion>\n\n");
         }
         ;
 
 funcion_binaryCount:
-        BINARYCOUNT PAR_A CORCHETE_A lista CORCHETE_C PAR_C {
+        BINARYCOUNT 
+        {
+              agregarTerceto(":=","@contBinarios", "0");  
+              agregarSimbolo("@contBinarios","Int","","");
+        }
+        PAR_A CORCHETE_A lista CORCHETE_C PAR_C {
                 printf("                El analizador sintactico reconoce: <Funcion_binaryCount> --> BINARYCOUNT PAR_A CORCHETE_A <Lista> CORCHETE_C PAR_C\n\n");
-                char cant[6];
-                sprintf(cant, "%d", cont);
-                BinaryCountInd= agregarTerceto(cant,"_","_");
-                cont=0;
         }
         ;
 
 lista:
         elemento {
-                ListaInd = ElementoInd;
+                
                 printf("                El analizador sintactico reconoce: <Lista> --> <Elemento>\n\n");
         }
         | lista COMA elemento {
-                ListaInd = agregarTerceto(",", formatear(ListaInd), formatear(ElementoInd));
+                
                 printf("                El analizador sintactico reconoce: <Lista> --> <Lista> COMA <Elemento>\n\n");
         }
         ;
@@ -627,19 +707,25 @@ elemento:
         ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
                 ElementoInd = agregarTerceto($1, "_", "_");
+                ElementoInd = agregarTerceto("CMP",formatear(ElementoInd),"es_binario");
+                agregarTerceto("BNE",formatear(ElementoInd+4),"_");
+                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
+                agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
+
+                
         }
         | CTE_ENTERA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_ENTERA\n\n");
-                ElementoInd = agregarTerceto($1, "_", "_");
+                
         }
         | CTE_REAL {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_REAL\n\n");
-                ElementoInd = agregarTerceto($1, "_", "_");
+              
         }
         | CTE_BINARIA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_BINARIA\n\n");
-                ElementoInd = agregarTerceto("CTE_BINARIA", "_", "_");
-                cont++;
+                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
+                agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
         }
         ;
 
@@ -688,3 +774,161 @@ char* formatearComparador(char* comparador) {
     if (strcmp(comparador, ">=") == 0) return "BLT";
     return "Invalid comparator";
 }
+
+void reemplazarEspaciosPorGuionBajo(char* str) {
+    while (*str) {
+        if (*str == ' ') {
+            *str = '_';  // Reemplazamos el espacio por un guion bajo
+        }
+        str++;
+    }
+}
+
+void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
+   
+    FILE *fileASM = fopen(nombre_archivo_asm, "w");
+
+    if (fileASM == NULL) {
+        printf("Error al intentar guardar el codigo assemblr en archivo %s.", nombre_archivo_asm);
+        return;
+    }
+
+    fprintf(fileASM, ".MODEL LARGE\n");
+    fprintf(fileASM, ".386\n");
+    fprintf(fileASM, ".STACK 200h\n");
+    fprintf(fileASM, "\n.DATA\n");
+
+    Lista dataLista = NULL;
+    crearLista(&dataLista);
+    copiarTablaDeSimbolos(&dataLista);
+
+    Nodo* current = dataLista;  // Aquí 'data' es de tipo Lista (puntero a Nodo)
+
+    while (current != NULL) {
+        simbolo* _simbolo = (simbolo*)current->dato;  // Obtener el símbolo desde el nodo
+
+        // Escribir los datos del símbolo en el archivo
+        if (_simbolo->valor[0] == '\0') {  // Si el valor está vacío
+                if(strcmp(_simbolo->tipo_de_dato, "String") == 0) {
+                        fprintf(fileASM, "%s\t\tdb 256 dup (?)\n", _simbolo->nombre); //ids
+                } else {
+                        fprintf(fileASM, "%s\t\tdd\t\t?\n", _simbolo->nombre); //ids
+                }
+        } else {                                                        //ctes
+                if(_simbolo->longitud[0] != '\0'){                          //tiene longitud ==> es cadena
+                        reemplazarEspaciosPorGuionBajo(_simbolo->nombre);
+                        fprintf(fileASM, "_cte_%s\t\tdb\t\t\"%s\",'$', 3 dup (?)\n", _simbolo->nombre, _simbolo->valor);
+                } else {   //no cadena
+                        if(strchr(_simbolo->valor, '.') == NULL){             //es int 
+                                if(_simbolo->valor[1] == 'b') {                 //es binario  
+                                        fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t%s\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                }
+                                else {
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s.0\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                }                               
+                        } else{
+                                if(_simbolo->valor[0] == '.') {// .5 ==> agrego cero ==> 0.5
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
+                                }
+                                else {
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
+                                }
+                        }
+                }
+        }
+        
+        // Avanzar al siguiente nodo
+        current = current->sig;
+    }
+
+    fprintf(fileASM, "\n.CODE\n");
+    fprintf(fileASM, "mov  AX, @data\n");
+    fprintf(fileASM, "mov  DS, AX\n");
+    fprintf(fileASM, "mov  es, ax\n");
+
+    Lista codigoLista = NULL;
+    crearLista(&codigoLista);
+    copiarListaDeTercetos(&codigoLista);
+
+    Lista PilaASM = NULL;
+    crearLista(&PilaASM);
+
+    current = codigoLista;
+    char operadorIzq[50], operadorDer[50];
+
+    while (current != NULL) {
+        terceto* _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
+
+        if (strcmp(_terceto->operando, "+") == 0) {
+                eliminarUltimo(&PilaASM, &operadorDer, sizeof(operadorIzq));
+                eliminarUltimo(&PilaASM, &operadorIzq, sizeof(operadorIzq));
+
+                fprintf(fileASM, "fld\t\t\n",operadorIzq);
+                fprintf(fileASM, "fld\t\t\n",operadorDer);
+                fprintf(fileASM, "fadd\n");
+
+                insertarListaAlFinal(&PilaASM, _terceto->operando, sizeof(_terceto->operando));
+
+        } 
+        else if (strcmp(_terceto->operando, "-") == 0) {
+        // Código para la resta
+        } 
+        else if (strcmp(_terceto->operando, "*") == 0) {
+        // Código para la multiplicación
+        } 
+        else if (strcmp(_terceto->operando, "/") == 0) {
+        // Código para la división
+        } 
+        else if (strcmp(_terceto->operando, ":=") == 0) {
+        // Código para asignación
+        } 
+        else if (strcmp(_terceto->operando, "LEER") == 0) {
+        // Código para leer
+        } 
+        else if (strcmp(_terceto->operando, "ESCRIBIR") == 0) {
+        // Código para escribir
+        } 
+        else if (strcmp(_terceto->operando, "CMP") == 0) {
+        // Código para comparación
+        } 
+        else if (strcmp(_terceto->operando, "BGE") == 0) {
+        // Código para "BGE"
+        } 
+        else if (strcmp(_terceto->operando, "BGT") == 0) {
+        // Código para "BGT"
+        } 
+        else if (strcmp(_terceto->operando, "BLE") == 0) {
+        // Código para "BLE"
+        } 
+        else if (strcmp(_terceto->operando, "BLT") == 0) {
+        // Código para "BLT"
+        } 
+        else if (strcmp(_terceto->operando, "BEQ") == 0) {
+        // Código para "BEQ"
+        } 
+        else if (strcmp(_terceto->operando, "BNE") == 0) {
+        // Código para "BNE"
+        } 
+        else if (strcmp(_terceto->operando, "BI") == 0) {
+        // Código para "BI"
+        } 
+        else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0){
+        // Aca va el código por defecto para etiquetas y apilaciones
+        }
+        else { //apilo comando
+                insertarListaAlFinal(&PilaASM, _terceto->operando, sizeof(_terceto->operando));
+        }
+
+        // Avanzar al siguiente nodo
+        current = current->sig;
+    }
+
+    fprintf(fileASM, "mov  ax, 4c00h\n");
+    fprintf(fileASM, "int  21h\n");
+    fprintf(fileASM, "END\n");
+
+
+    fclose(fileASM);
+    printf("El archivo %s ha sido generado.\n", nombre_archivo_asm);
+}
+
