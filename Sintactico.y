@@ -269,7 +269,7 @@ asignacion:
                      exit(1);   
                 }
 
-                AsignacionInd = agregarTerceto(":=", $1, "@cantBinarios");
+                AsignacionInd = agregarTerceto(":=", $1, "@contBinarios");
         }
 
         | ID OP_ASIG CTE_CADENA {
@@ -716,12 +716,14 @@ lista:
 elemento:
         ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
-                ElementoInd = agregarTerceto($1, "_", "_");
-                ElementoInd = agregarTerceto("CMP",formatear(ElementoInd),"es_binario");
-                agregarTerceto("BNE",formatear(ElementoInd+4),"_");
-                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
-                agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
+                //ElementoInd = agregarTerceto($1, "_", "_");
+                //ElementoInd = agregarTerceto("CMP",formatear(ElementoInd),"es_binario");
+                //agregarTerceto("BNE",formatear(ElementoInd+4),"_");
 
+                //int aux1 = agregarTerceto("@contBinarios", "_","_");
+                //int aux2 = agregarTerceto("1", "_","_");
+                //ElementoInd= agregarTerceto("+", formatear(aux1), formatear(aux2));
+                //agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
                 
         }
         | CTE_ENTERA {
@@ -734,7 +736,9 @@ elemento:
         }
         | CTE_BINARIA {
                 printf("                El analizador sintactico reconoce: <Elemento> --> CTE_BINARIA\n\n");
-                ElementoInd= agregarTerceto("+", "@contBinarios", "1");
+                int aux1 = agregarTerceto("@contBinarios", "_","_");
+                int aux2 = agregarTerceto("1", "_","_");
+                ElementoInd= agregarTerceto("+", formatear(aux1), formatear(aux2));
                 agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
         }
         ;
@@ -994,10 +998,10 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
         } 
         else if (strcmp(_terceto->operando, ":=") == 0) {
                 strcpy(dato.indice, _terceto->operadorDer);
-                //printf("indice %s\n", dato.indice);
+               
                 int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
-
-                if (result >= 0 && strncmp(dato.variable, "_cte_cad_", 9) == 0) {                      //si es cadena se asigna directo
+                //printf("busco %s encuentro: %s\n", dato.indice, dato.variable);
+                if (result >= 0) {                      //si existe en tabla de simbolos (cadena o en binarycount) se asigna directo
                         fprintf(fileASM, "fld %s\n", dato.variable);
                         fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
 
@@ -1041,24 +1045,29 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
                 fprintf(fileASM, "newline 1\n\n");
         } 
         else if (strcmp(_terceto->operando, "CMP") == 0) {
-                strcpy(dato.indice, _terceto->operadorIzq); //ver si son ids
-                int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);  //si son ids estan
-                if (result < 0) { //si no estan ==> son indices y tengo que desapilar
-                        eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer));
+                if(strcmp(_terceto->operadorDer, "es_binario") == 0){
                         eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
 
-                        strcpy(dato.indice, operadorIzq);
-                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
-                        fprintf(fileASM, "fld %s\n", dato.variable);
+                        //ver que hacems ==> es bin
+                } else {
+                        strcpy(dato.indice, _terceto->operadorIzq); //ver si son ids
+                        int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);  //si son ids estan
+                        if (result < 0) { //si no estan ==> son indices y tengo que desapilar
+                                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer));
+                                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
 
-                        strcpy(dato.indice, operadorDer);
-                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
-                        fprintf(fileASM, "fld %s\n", dato.variable);
-                } else { //estan en el CMP
-                        fprintf(fileASM, "fld %s\n", _terceto->operadorIzq);
-                        fprintf(fileASM, "fstp %s\n", _terceto->operadorDer);
+                                strcpy(dato.indice, operadorIzq);
+                                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                                fprintf(fileASM, "fld %s\n", dato.variable);
+
+                                strcpy(dato.indice, operadorDer);
+                                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                                fprintf(fileASM, "fld %s\n", dato.variable);
+                        } else { //estan en el CMP
+                                fprintf(fileASM, "fld %s\n", _terceto->operadorIzq);
+                                fprintf(fileASM, "fstp %s\n", _terceto->operadorDer);
+                        }  
                 }
-                
 
                 fprintf(fileASM, "fxch\n");
                 fprintf(fileASM, "fcom\n");

@@ -255,7 +255,6 @@ fstp @lado3
 
 fld @lado1
 fstp @lado2
-
 fxch
 fcom
 fstsw ax
@@ -265,7 +264,6 @@ jne ETIQUETA_[112]
 
 fld @lado2
 fstp @lado3
-
 fxch
 fcom
 fstsw ax
@@ -281,7 +279,6 @@ jmp ETIQUETA_[121]
 ETIQUETA_[112]:
 fld @lado1
 fstp @lado2
-
 fxch
 fcom
 fstsw ax
@@ -291,7 +288,6 @@ je ETIQUETA_[118]
 
 fld @lado1
 fstp @lado3
-
 fxch
 fcom
 fstsw ax
@@ -301,7 +297,6 @@ je ETIQUETA_[118]
 
 fld @lado2
 fstp @lado3
-
 fxch
 fcom
 fstsw ax
@@ -326,47 +321,19 @@ fstp string2
 fld _cte_0
 fstp @contBinarios
 
-fld _cte_0
+fld @contBinarios
 fld _cte_1
 fadd
 
 fstp @contBinarios
 
+fld @contBinarios
 fld _cte_1
-fld int1
-fxch
-fcom
-fstsw ax
-sahf
-ffree
-jne ETIQUETA_[130]
-
-fld int1
 fadd
 
 fstp @contBinarios
 
-ETIQUETA_[130]:
-fld int1
-fld int4
-fxch
-fcom
-fstsw ax
-sahf
-ffree
-jne ETIQUETA_[135]
-
-fld int4
-fadd
-
-fstp @contBinarios
-
-ETIQUETA_[135]:
-fld int4
-fadd
-
-fstp @contBinarios
-
+fld @contBinarios
 fstp int3
 
 mov  ax, 4c00h
