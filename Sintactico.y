@@ -849,6 +849,9 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
         return;
     }
 
+    fprintf(fileASM, "include macros2.asm\n");
+    fprintf(fileASM, "include number.asm\n\n");
+
     fprintf(fileASM, ".MODEL LARGE\n");
     fprintf(fileASM, ".386\n");
     fprintf(fileASM, ".STACK 200h\n");
