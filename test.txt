@@ -46,4 +46,57 @@ leer(string2)
 escribir(string1)
 
 escribir("Hola")
+
+si (int1 > int2 AND int3 > int4)
+
+{
+
+    escribir("Se cumple la condicion.")
+
+}
+
+sino{
+
+	escribir("No se cumple la condicion.")
+
+}
+ 
+si (int2 > int3 OR int4 > int1)
+
+{
+
+    escribir("Ok.")
+
+}
+ 
+ 
+mientras (NOT int4 > int5)
+
+{
+
+    escribir("int4 es menor que int5")
+
+    int4 := int4 + 1
+
+}
+ 
+mientras (NOT int1 > int2)
+{
+
+    	escribir("int2 es mas grande que int1")
+
+	mientras (int1 > int3)
+
+	{
+
+        	int1 := int1 + 1
+
+	}
+
+}
+ 
+*- Testeamos las funciones especiales -*
+
+string2 := triangulo(5, 1+1, float1)
+int3 := binaryCount([0b110,5,0,int1,int4,0b10101100,-1])
  

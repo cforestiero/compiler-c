@@ -18,6 +18,7 @@ char* formatearComparador(char* comparador);
 
 void reemplazarEspaciosPorGuionBajo(char* str);
 int compararIndices(const void* a, const void* b);
+int compararEtiq(const void* a, const void* b);
 void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
@@ -28,7 +29,7 @@ int AsignacionInd;
 int ExpresionInd;
 int TerminoInd;
 int FactorInd;
-int PorgramaInd;
+int ProgramaInd;
 int BloqueInd;
 int SentenciaInd;
 int ElementoInd;
@@ -124,7 +125,7 @@ programa:
                 guardarTercetos(nombre_archivo_tercetos);
                 generar_assemblr(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
                 
-                PorgramaInd = BloqueInd;
+                ProgramaInd = BloqueInd;
         }
         ;
 
@@ -159,7 +160,8 @@ declaracion:
                         }          
                 }
            
-                printf("                El analizador sintactico reconoce: <Declaracion> --> <Lista_de_variables> DOS_PUNTOS <Tipo_de_dato>\n\n");}
+                printf("                El analizador sintactico reconoce: <Declaracion> --> <Lista_de_variables> DOS_PUNTOS <Tipo_de_dato>\n\n");
+        }
         ;
 
 lista_de_variables:
@@ -168,7 +170,8 @@ lista_de_variables:
                 if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK){
                         exit(1);
                 }
-                printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
+                printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");
+        }
         | ID {
                 if(!listaCreada){
                         
@@ -180,7 +183,8 @@ lista_de_variables:
                         exit(1);
                 }
 
-                printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");}
+                printf("                El analizador sintactico reconoce: <Lista_de_variables> --> ID\n\n");
+        }
         ;
 
 tipo_de_dato:
@@ -878,15 +882,29 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
 
     Lista codigoLista = NULL;
     Lista pilaASM = NULL;
+    Lista pilaCiclos = NULL;
     crearLista(&codigoLista);
     crearLista(&pilaASM);
+    crearLista(&pilaCiclos);
     copiarListaDeTercetos(&codigoLista);
 
     current = codigoLista; 
-    char operadorIzq[500], operadorDer[500];
+    char operadorIzq[50], operadorDer[50];
+    char etiquetaComparacion[50];
+    int band;
 
     while (current != NULL) {
         terceto* _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
+        band = 0;
+        
+        sprintf(etiquetaComparacion, "[%d]", _terceto->indice);
+        //printf("comparo antes %s\n", etiquetaComparacion);
+        if(buscarPorClaveGuardaDatos(&pilaCiclos, &etiquetaComparacion, sizeof(etiquetaComparacion), compararEtiq) >= 0 ){
+                fprintf(fileASM, "ETIQUETA_%s:\n", etiquetaComparacion);
+                //printf("ETIQUETA_%s:\n", etiquetaComparacion);
+                eliminarDesordPorClave(&pilaCiclos, &etiquetaComparacion, sizeof(etiquetaComparacion), compararEtiq);
+                band = 1;
+        }
 
         if (strcmp(_terceto->operando, "+") == 0) {
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
@@ -931,7 +949,7 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
                 insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
         } 
         else if (strcmp(_terceto->operando, "*") == 0) {
-                                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
+                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
 
                 if(strcmp(operadorIzq, "@@@") != 0){
@@ -976,9 +994,10 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
         } 
         else if (strcmp(_terceto->operando, ":=") == 0) {
                 strcpy(dato.indice, _terceto->operadorDer);
-                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                //printf("indice %s\n", dato.indice);
+                int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
 
-                if (strncmp(dato.variable, "_cte_cad_", 9) == 0) {                      //si es cadena se asigna directo
+                if (result >= 0 && strncmp(dato.variable, "_cte_cad_", 9) == 0) {                      //si es cadena se asigna directo
                         fprintf(fileASM, "fld %s\n", dato.variable);
                         fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
 
@@ -1006,8 +1025,8 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
 
                 fprintf(fileASM, "lea dx, %s\n", dato.variable);
                 fprintf(fileASM, "mov byte ptr [dx], %d\n", sizeof(dato.indice)-1);
-                fprintf(fileASM, "mov ah, 0Ah\n\n");
-                fprintf(fileASM, "int 21h\n");
+                fprintf(fileASM, "mov ah, 0Ah\n");
+                fprintf(fileASM, "int 21h\n\n");
                 
         } 
         else if (strcmp(_terceto->operando, "ESCRIBIR") == 0) {
@@ -1022,33 +1041,71 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
                 fprintf(fileASM, "newline 1\n\n");
         } 
         else if (strcmp(_terceto->operando, "CMP") == 0) {
-        // Código para comparación
+                strcpy(dato.indice, _terceto->operadorIzq); //ver si son ids
+                int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);  //si son ids estan
+                if (result < 0) { //si no estan ==> son indices y tengo que desapilar
+                        eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer));
+                        eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
+
+                        strcpy(dato.indice, operadorIzq);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+
+                        strcpy(dato.indice, operadorDer);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                } else { //estan en el CMP
+                        fprintf(fileASM, "fld %s\n", _terceto->operadorIzq);
+                        fprintf(fileASM, "fstp %s\n", _terceto->operadorDer);
+                }
+                
+
+                fprintf(fileASM, "fxch\n");
+                fprintf(fileASM, "fcom\n");
+                fprintf(fileASM, "fstsw ax\n");
+                fprintf(fileASM, "sahf\n");
+                fprintf(fileASM, "ffree\n");
+
         } 
         else if (strcmp(_terceto->operando, "BGE") == 0) {
-        // Código para "BGE"
+                fprintf(fileASM, "jae ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BGT") == 0) {
-        // Código para "BGT"
+                fprintf(fileASM, "ja ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BLE") == 0) {
-        // Código para "BLE"
+                fprintf(fileASM, "jbe ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BLT") == 0) {
-        // Código para "BLT"
+                fprintf(fileASM, "jb ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BEQ") == 0) {
-        // Código para "BEQ"
+                fprintf(fileASM, "je ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BNE") == 0) {
-        // Código para "BNE"
+                fprintf(fileASM, "jne ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
+                //printf("apilo%s\n", _terceto->operadorIzq);
         } 
         else if (strcmp(_terceto->operando, "BI") == 0) {
-        // Código para "BI"
+                fprintf(fileASM, "jmp ETIQUETA_%s\n\n",_terceto->operadorIzq);
+                insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
         } 
-        else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0){
-        // Aca va el código por defecto para etiquetas y apilaciones
+        else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0 && band == 0){
+                sprintf(etiquetaComparacion, "[%d]", _terceto->indice);
+                fprintf(fileASM, "ETIQUETA_%s:\n\n",etiquetaComparacion);
         }
-        else { //apilo comando
+        else {  //apilo comando
                 insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
                 //printf("APILPO %s\n", _terceto->operando);
         }
@@ -1073,5 +1130,14 @@ int compararIndices(const void *e1, const void *e2) {
     // Comparar por índice
     return strcmp(d1->indice, d2->indice);
 }
+
+int compararEtiq(const void* a, const void* b) {
+    const char *d1 = (const char *)a;
+    const char *d2 = (const char *)b;
+
+    // Comparar por índice
+    return strcmpi(d1, d2);
+}
+
 
 
