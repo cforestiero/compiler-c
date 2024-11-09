@@ -19,7 +19,7 @@ char* formatearComparador(char* comparador);
 void reemplazarEspaciosPorGuionBajo(char* str);
 int compararIndices(const void* a, const void* b);
 int compararEtiq(const void* a, const void* b);
-void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
+void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
@@ -123,7 +123,7 @@ programa:
                 
                 guardarTablaDeSimbolos(nombre_archivo_tabla);
                 guardarTercetos(nombre_archivo_tercetos);
-                generar_assemblr(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
+                generar_assembler(nombre_archivo_asm, nombre_archivo_tabla, nombre_archivo_tercetos);
                 
                 ProgramaInd = BloqueInd;
         }
@@ -798,7 +798,7 @@ void reemplazarEspaciosPorGuionBajo(char* str) {
     }
 }
 
-void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
+void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
    
     FILE *fileASM = fopen(nombre_archivo_asm, "w");
 
