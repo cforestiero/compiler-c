@@ -9,8 +9,8 @@ init
     string1, string2: String
 
 }
- 
-int1 := float2
+
+int1 := 1
 
 float1 := 1.5
 
@@ -46,7 +46,7 @@ leer(string2)
 escribir(string1)
 
 escribir("Hola")
- 
+
 si (int1 > int2 AND int3 > int4)
 
 {

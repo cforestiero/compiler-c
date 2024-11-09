@@ -272,7 +272,7 @@ int buscarPorClaveGuardaDatos(const Lista* pl, void* dato, size_t tam, Cmp cmp)
         memcpy(dato,pun->dato,MIN(tam,pun->tam));
         return cont;
     }
-    return 0;
+    return -1;
 }
 int buscarPorPosicion(Lista *pl, void* dato, int pos, size_t tam)
 {
