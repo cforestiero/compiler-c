@@ -10,7 +10,7 @@ init
 
 }
  
-int1 := 1
+int1 := float2
 
 float1 := 1.5
 

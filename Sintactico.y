@@ -236,8 +236,7 @@ asignacion:
 
                 char *tipoObtenido2;
                 tipoObtenido2 = retornarTipoDeDato($3);
-                printf("EXPRESIOOOOOON %s", $3);
-                printf("TIPOOOOOOO%sa", tipoObtenido2);
+
                 if(strcmp("",tipoObtenido2) != 0){
                         if(strcmp(tipoObtenido,tipoObtenido2) != 0){
                         printf("ERROR SEMANTICO: Asignacion de datos de distinto tipo.\n", $1);
