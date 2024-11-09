@@ -17,6 +17,7 @@ char* formatear(int indice);
 char* formatearComparador(char* comparador);
 
 void reemplazarEspaciosPorGuionBajo(char* str);
+int compararIndices(const void* a, const void* b);
 void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
@@ -50,6 +51,11 @@ Lista ListaComparaciones;
 Lista ListaComparadores;
 Lista ListaCondicionesTipo;
 Lista ListaExpresiones;
+
+typedef struct {
+    char indice[150];
+    char variable[150];       
+} datoAsm;
 
 %}
 
@@ -799,10 +805,13 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
     fprintf(fileASM, "\n.DATA\n");
 
     Lista dataLista = NULL;
+    Lista ListaVariables = NULL;
     crearLista(&dataLista);
+    crearLista(&ListaVariables);
     copiarTablaDeSimbolos(&dataLista);
 
     Nodo* current = dataLista;  // Aquí 'data' es de tipo Lista (puntero a Nodo)
+    datoAsm dato;
 
     while (current != NULL) {
         simbolo* _simbolo = (simbolo*)current->dato;  // Obtener el símbolo desde el nodo
@@ -811,27 +820,48 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
         if (_simbolo->valor[0] == '\0') {  // Si el valor está vacío
                 if(strcmp(_simbolo->tipo_de_dato, "String") == 0) {
                         fprintf(fileASM, "%s\t\tdb 256 dup (?)\n", _simbolo->nombre); //ids
+                        strcpy(dato.indice, _simbolo->nombre);
+                        strcpy(dato.variable, _simbolo->nombre);
+                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 } else {
                         fprintf(fileASM, "%s\t\tdd\t\t?\n", _simbolo->nombre); //ids
+                        strcpy(dato.indice, _simbolo->nombre);
+                        strcpy(dato.variable, _simbolo->nombre);
+                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 }
         } else {                                                        //ctes
                 if(_simbolo->longitud[0] != '\0'){                          //tiene longitud ==> es cadena
                         reemplazarEspaciosPorGuionBajo(_simbolo->nombre);
-                        fprintf(fileASM, "_cte_%s\t\tdb\t\t\"%s\",'$', 3 dup (?)\n", _simbolo->nombre, _simbolo->valor);
+                        fprintf(fileASM, "_cte_cad_%s\t\tdb\t\t\"%s\",'$', 3 dup (?)\n", _simbolo->nombre, _simbolo->valor);
+                        strcpy(dato.indice, _simbolo->valor);
+                        sprintf(dato.variable, "_cte_cad_%s", _simbolo->nombre);
+                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 } else {   //no cadena
                         if(strchr(_simbolo->valor, '.') == NULL){             //es int 
                                 if(_simbolo->valor[1] == 'b') {                 //es binario  
                                         fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t%s\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                        strcpy(dato.indice, _simbolo->nombre);
+                                        sprintf(dato.variable, "_cte_bin_%s", _simbolo->nombre);
+                                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                                 else {
                                         fprintf(fileASM, "_cte_%s\t\tdd\t\t%s.0\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                        strcpy(dato.indice, _simbolo->nombre);
+                                        sprintf(dato.variable, "_cte_%s", _simbolo->nombre);
+                                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }                               
                         } else{
                                 if(_simbolo->valor[0] == '.') {// .5 ==> agrego cero ==> 0.5
-                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
+                                        fprintf(fileASM, "_cte_0%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
+                                        strcpy(dato.indice, _simbolo->nombre);
+                                        sprintf(dato.variable, "_cte_0%s", _simbolo->nombre);
+                                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                                 else {
                                         fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
+                                        strcpy(dato.indice, _simbolo->nombre);
+                                        sprintf(dato.variable, "_cte_%s", _simbolo->nombre);
+                                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                         }
                 }
@@ -844,37 +874,152 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
     fprintf(fileASM, "\n.CODE\n");
     fprintf(fileASM, "mov  AX, @data\n");
     fprintf(fileASM, "mov  DS, AX\n");
-    fprintf(fileASM, "mov  es, ax\n");
+    fprintf(fileASM, "mov  es, ax\n\n");
 
     Lista codigoLista = NULL;
+    Lista pilaASM = NULL;
     crearLista(&codigoLista);
+    crearLista(&pilaASM);
     copiarListaDeTercetos(&codigoLista);
 
     current = codigoLista; 
+    char operadorIzq[500], operadorDer[500];
 
     while (current != NULL) {
         terceto* _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
 
         if (strcmp(_terceto->operando, "+") == 0) {
-        // Código para la suma
-        } 
+                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
+
+                if(strcmp(operadorIzq, "@@@") != 0){
+                        //cargo a st(1) = izq
+                        strcpy(dato.indice, operadorIzq);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                if(strcmp(operadorDer, "@@@") != 0) {
+                        //cargo a st(0) = der
+                        strcpy(dato.indice, operadorDer);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                fprintf(fileASM, "fadd\n\n");
+                insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
+        }
         else if (strcmp(_terceto->operando, "-") == 0) {
-        // Código para la resta
+                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
+
+                if(strcmp(operadorIzq, "@@@") != 0){
+                        //cargo a st(1) = izq
+                        strcpy(dato.indice, operadorIzq);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                if(strcmp(operadorDer, "@@@") != 0) {
+                        //cargo a st(0) = der
+                        strcpy(dato.indice, operadorDer);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                fprintf(fileASM, "fsub\n\n");
+                insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
         } 
         else if (strcmp(_terceto->operando, "*") == 0) {
-        // Código para la multiplicación
+                                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
+
+                if(strcmp(operadorIzq, "@@@") != 0){
+                        //cargo a st(1) = izq
+                        strcpy(dato.indice, operadorIzq);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                if(strcmp(operadorDer, "@@@") != 0) {
+                        //cargo a st(0) = der
+                        strcpy(dato.indice, operadorDer);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                fprintf(fileASM, "fmul\n\n");
+                insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
+
         } 
         else if (strcmp(_terceto->operando, "/") == 0) {
-        // Código para la división
+                eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
+
+                if(strcmp(operadorIzq, "@@@") != 0){
+                        //cargo a st(1) = izq
+                        strcpy(dato.indice, operadorIzq);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                if(strcmp(operadorDer, "@@@") != 0) {
+                        //cargo a st(0) = der
+                        strcpy(dato.indice, operadorDer);
+                        buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                }
+
+                fprintf(fileASM, "fdiv\n\n");
+                insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
+                
         } 
         else if (strcmp(_terceto->operando, ":=") == 0) {
-        // Código para asignación
+                strcpy(dato.indice, _terceto->operadorDer);
+                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+
+                if (strncmp(dato.variable, "_cte_cad_", 9) == 0) {                      //si es cadena se asigna directo
+                        fprintf(fileASM, "fld %s\n", dato.variable);
+                        fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
+
+                } else {
+                        eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
+                        //printf("desapilo igual %s\n", operadorIzq);
+
+                        if(strcmp(operadorIzq, "@@@") == 0) {                           //asigno expresion
+                                fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
+                        } else {                                                        //asigno varible normal
+                                strcpy(dato.indice, operadorIzq);
+                                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                                fprintf(fileASM, "fld %s\n", dato.variable);
+
+                                fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
+                        }
+                }
+
         } 
         else if (strcmp(_terceto->operando, "LEER") == 0) {
-        // Código para leer
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
+                //printf("desapilo leer %s\n", operadorIzq);
+                strcpy(dato.indice, operadorIzq);
+                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+
+                fprintf(fileASM, "lea dx, %s\n", dato.variable);
+                fprintf(fileASM, "mov byte ptr [dx], %d\n", sizeof(dato.indice)-1);
+                fprintf(fileASM, "mov ah, 0Ah\n\n");
+                fprintf(fileASM, "int 21h\n");
+                
         } 
         else if (strcmp(_terceto->operando, "ESCRIBIR") == 0) {
-        // Código para escribir
+                eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
+                //printf("desapilo esscribir %s\n", operadorIzq);
+                strcpy(dato.indice, operadorIzq);
+                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
+
+                fprintf(fileASM, "mov dx, OFFSET %s\n", dato.variable);
+                fprintf(fileASM, "mov ah, 09h\n");
+                fprintf(fileASM, "int 21h\n");
+                fprintf(fileASM, "newline 1\n\n");
         } 
         else if (strcmp(_terceto->operando, "CMP") == 0) {
         // Código para comparación
@@ -900,13 +1045,17 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
         else if (strcmp(_terceto->operando, "BI") == 0) {
         // Código para "BI"
         } 
-        else {
+        else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0){
         // Aca va el código por defecto para etiquetas y apilaciones
+        }
+        else { //apilo comando
+                insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
+                //printf("APILPO %s\n", _terceto->operando);
         }
 
         // Avanzar al siguiente nodo
         current = current->sig;
-    }
+    } 
 
     fprintf(fileASM, "mov  ax, 4c00h\n");
     fprintf(fileASM, "int  21h\n");
@@ -916,4 +1065,13 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
     fclose(fileASM);
     printf("El archivo %s ha sido generado.\n", nombre_archivo_asm);
 }
+
+int compararIndices(const void *e1, const void *e2) {
+    const datoAsm *d1 = (const datoAsm *)e1;
+    const datoAsm *d2 = (const datoAsm *)e2;
+
+    // Comparar por índice
+    return strcmp(d1->indice, d2->indice);
+}
+
 
