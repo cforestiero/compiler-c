@@ -12,7 +12,7 @@ typedef struct {
     char nombre[50];    
     char tipo_de_dato[20];    
     char valor[50];   
-    char longitud[10];       
+    char longitud[10];      
 }simbolo;
 
 

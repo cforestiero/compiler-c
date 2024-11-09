@@ -1,6 +1,6 @@
 #include <memory.h>
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "Lista.h"
 
 ///principales
@@ -95,6 +95,24 @@ int contarElementosPorClaveDesord(const Lista *pl, const void* dato, Cmp cmp)
     }
     return contador;
 }
+
+int buscarEnLista(const Lista* pl, const void* dato, Cmp cmp)
+{
+    // Recorre la lista hasta encontrar el dato o llegar al final
+    while (*pl && cmp(dato, (*pl)->dato) > 0)
+    {
+        pl = &(*pl)->sig;
+    }
+
+    // Verifica si el dato encontrado es el mismo que se está buscando
+    if (*pl && cmp(dato, (*pl)->dato) == 0)
+    {
+        return DUPLICADO;  // El dato ya existe en la lista
+    }
+
+    return TODO_OK;  // El dato no existe en la lista
+}
+
 ///insertar
 int insertarListaOrdSinDupli(Lista* pl, const void* dato, size_t tam, Cmp cmp)
 {
@@ -102,7 +120,10 @@ int insertarListaOrdSinDupli(Lista* pl, const void* dato, size_t tam, Cmp cmp)
         pl = &(*pl)->sig;
 
     if(*pl && cmp(dato,(*pl)->dato) == 0)
+    {
         return DUPLICADO;
+    }
+        
 
     Nodo* nue = (Nodo*)malloc(sizeof(Nodo));
     void* datoN = malloc(tam);

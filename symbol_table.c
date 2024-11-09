@@ -20,7 +20,7 @@ int validarVariableDeclarada(char* nombre) {
             current = current->sig;
         }
 
-    printf("Error: La variable '%s' no ha sido declarada antes de la asignacion.\n", nombre);
+    printf("Error Semantico: La variable '%s' no ha sido declarada antes de ser usada.\n", nombre);
     return ERROR;
 }
 
@@ -129,11 +129,6 @@ int compararArrojandoError(const void *e1, const void *e2) {
     const char *s2 = (const char *)e2;
     
     int rta = strcmp(s1, s2);
-
-    if (rta == 0) {
-        printf("ERROR SEMANTICO: El simbolo '%s' ya ha sido declarado.\n", s1);
-        return ERROR;  // Asegúrate de que ERROR esté definido, por ejemplo, #define ERROR -1
-    }
 
     return rta;
 }

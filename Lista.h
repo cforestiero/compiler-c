@@ -26,6 +26,8 @@ typedef void (*Accion)(void* elem, void* datosAccion);
 void crearLista(Lista* pl);
 void vaciarLista(Lista* pl);
 
+int buscarEnLista(const Lista* pl, const void* dato, Cmp cmp);
+
 int listaVacia(const Lista* pl);
 int listaLlena(const Lista *pl, size_t tam);
 int verPrimeroLista(Lista *pl, void *dato, size_t tam);

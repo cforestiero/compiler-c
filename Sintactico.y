@@ -8,6 +8,8 @@
 #include "symbol_table.h"
 #include "Tercetos.h"
 
+extern Lista lista_simbolos;
+
 int yystopparser=0;
 FILE  *yyin;
 
@@ -22,6 +24,7 @@ void generar_assemblr(char* nombre_archivo_asm, char* nombre_archivo_tabla, char
 char* nombre_archivo_tabla = "symbol-table.txt";
 char* nombre_archivo_tercetos = "intermediate-code.txt";
 char* nombre_archivo_asm = "final.asm";
+char *tipoObtenidoExpresionComparacion;
 
 int AsignacionInd;
 int ExpresionInd;
@@ -98,6 +101,8 @@ Lista ListaExpresiones;
 %token INIT
 %type <s> tipo_de_dato
 %type <s> elemento
+%type <s> expresion
+
 
 %left '+''-'
 %left '*''/'
@@ -159,7 +164,8 @@ declaracion:
 lista_de_variables:
         lista_de_variables COMA ID {
                 
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK){
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK || buscarEnLista(&lista_simbolos,$3,compararArrojandoError) != TODO_OK){
+                        printf("Error Semantico: Variable duplicada. Ya fue definida anteriormente.\n");
                         exit(1);
                 }
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");}
@@ -170,7 +176,8 @@ lista_de_variables:
                         listaCreada = 1;
                 }
               
-                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[500]), compararArrojandoError) != TODO_OK){
+                if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[500]), compararArrojandoError) != TODO_OK || buscarEnLista(&lista_simbolos,$1,compararArrojandoError) != TODO_OK){
+                        printf("Error Semantico: Variable duplicada. Ya fue definida anteriormente.\n");
                         exit(1);
                 }
 
@@ -226,6 +233,18 @@ asignacion:
                      printf("ERROR SEMANTICO: %s es del tipo String, asignacion invalida.\n", $1);
                      exit(1);   
                 }
+
+                char *tipoObtenido2;
+                tipoObtenido2 = retornarTipoDeDato($3);
+                printf("EXPRESIOOOOOON %s", $3);
+                printf("TIPOOOOOOO%sa", tipoObtenido2);
+                if(strcmp("",tipoObtenido2) != 0){
+                        if(strcmp(tipoObtenido,tipoObtenido2) != 0){
+                        printf("ERROR SEMANTICO: Asignacion de datos de distinto tipo.\n", $1);
+                        exit(1);   
+                        }
+                }        
+
                 AsignacionInd = agregarTerceto(":=", $1, formatear(ExpresionInd));
                 
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG <Expresion>\n\n");
@@ -416,11 +435,22 @@ comparacion:
         expresion {
                 ComparacionInd = ExpresionInd;
 
-        }
+                tipoObtenidoExpresionComparacion = retornarTipoDeDato($1);
+                }
         comparador expresion {
                 
                 printf("                El analizador sintactico reconoce: <Comparacion> --> <Expresion> <Comparador> <Expresion>\n\n");
                 
+                char *tipoObtenido2;
+                tipoObtenido2 = retornarTipoDeDato($4);
+
+                if(strcmp(tipoObtenidoExpresionComparacion,"") != 0 && strcmp(tipoObtenido2,"") != 0){
+                        if(strcmp(tipoObtenidoExpresionComparacion,tipoObtenido2) != 0){
+                        printf("ERROR SEMANTICO: Comparacion de variables de distinto tipo.\n");
+                        exit(1);   
+                        }
+                }
+
                 agregarTerceto("CMP",formatear(ComparacionInd),formatear(ExpresionInd));
                 
                 char auxComparador[2];
@@ -429,7 +459,8 @@ comparacion:
 
                 eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
 
-                insertarListaAlFinal(&ListaComparaciones, &ComparacionInd, sizeof(ComparacionInd));
+                insertarListaAlFinal(&ListaComparaciones, &ComparacionInd, sizeof(ComparacionInd));   
+                
         }
         ;
 
@@ -528,6 +559,9 @@ escritura:
 salida:
         ID {
                 printf("                El analizador sintactico reconoce: <Salida> --> ID\n\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
                 SalidaInd= agregarTerceto($1,"_","_");
         }
         | CTE_CADENA {
@@ -554,6 +588,9 @@ lectura:
 entrada:
         ID {
                 printf("                El analizador sintactico reconoce: <Entrada> --> ID\n\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
                 EntradaInd= agregarTerceto($1,"_","_");
         }
         ;
@@ -590,6 +627,17 @@ termino:
 factor: 
         ID {
                 printf("                El analizador sintactico reconoce: <Factor> --> ID\n\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+                if(strcmp(tipoObtenido,"String") == 0){
+                     printf("ERROR SEMANTICO: Asignacion incorrecta.\n");
+                     exit(1);   
+                }
+
                 FactorInd = agregarTerceto($1, "_", "_"); 
         }
         | CTE_ENTERA {   
@@ -630,6 +678,9 @@ factor:
 
         | OP_RES ID %prec MENOS_UNARIO {
                 printf("                El analizador sintactico reconoce: <Factor> --> - ID\n\n");
+                if(validarVariableDeclarada($2) != TODO_OK){
+                        exit(1);
+                }
                 FactorInd= agregarTerceto("-","0",$2);
         }
         ;
@@ -706,6 +757,9 @@ lista:
 elemento:
         ID {
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
                 ElementoInd = agregarTerceto($1, "_", "_");
                 ElementoInd = agregarTerceto("CMP",formatear(ElementoInd),"es_binario");
                 agregarTerceto("BNE",formatear(ElementoInd+4),"_");
