@@ -849,16 +849,14 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
         return;
     }
 
-    fprintf(fileASM, "include number.asm\n\n");
-    fprintf(fileASM, "include numbers.asm\n\n");
-    fprintf(fileASM, "include macros.asm\n");
-    fprintf(fileASM, "include macros2.asm\n");
+    fprintf(fileASM, "include number.asm\n");
+    fprintf(fileASM, "include macros2.asm\n\n");
     
 
     fprintf(fileASM, ".MODEL LARGE\n");
     fprintf(fileASM, ".386\n");
     fprintf(fileASM, ".STACK 200h\n\n");
-    fprintf(fileASM, "MAXTEXTSIZE equ 256\n\n");
+    fprintf(fileASM, "MAXTEXTSIZE equ 40\n\n");
     fprintf(fileASM, "\n.DATA\n");
 
     Lista dataLista = NULL;
@@ -929,9 +927,11 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
     }
 
     fprintf(fileASM, "\n.CODE\n");
+    fprintf(fileASM, "\nSTART:\n\n");
     fprintf(fileASM, "mov  AX, @data\n");
     fprintf(fileASM, "mov  DS, AX\n");
     fprintf(fileASM, "mov  es, ax\n\n");
+
 
     Lista codigoLista = NULL;
     Lista pilaASM = NULL;
@@ -1184,7 +1184,38 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
 
     fprintf(fileASM, "mov  ax, 4c00h\n");
     fprintf(fileASM, "int  21h\n");
-    fprintf(fileASM, "END\n");
+
+    fprintf(fileASM, "; devuelve en BX la cantidad de caracteres que tiene un string\n");
+    fprintf(fileASM, "; DS:SI apunta al string.\n");
+    fprintf(fileASM, ";\n");
+    fprintf(fileASM, "STRLEN PROC NEAR\n");
+    fprintf(fileASM, "    mov bx,0\n");
+    fprintf(fileASM, "STRL01:\n");
+    fprintf(fileASM, "    cmp BYTE PTR [SI+BX],'$'\n");
+    fprintf(fileASM, "    je STREND\n");
+    fprintf(fileASM, "    inc BX\n");
+    fprintf(fileASM, "    jmp STRL01\n");
+    fprintf(fileASM, "STREND:\n");
+    fprintf(fileASM, "    ret\n");
+    fprintf(fileASM, "STRLEN ENDP\n\n");
+
+    fprintf(fileASM, "; copia DS:SI a ES:DI; busca la cantidad de caracteres\n");
+    fprintf(fileASM, ";\n");
+    fprintf(fileASM, "COPIAR PROC NEAR\n");
+    fprintf(fileASM, "    call STRLEN\n");
+    fprintf(fileASM, "    cmp bx,MAXTEXTSIZE\n");
+    fprintf(fileASM, "    jle COPIARSIZEOK\n");
+    fprintf(fileASM, "    mov bx,MAXTEXTSIZE\n");
+    fprintf(fileASM, "COPIARSIZEOK:\n");
+    fprintf(fileASM, "    mov cx,bx\n");
+    fprintf(fileASM, "    cld\n");
+    fprintf(fileASM, "    rep movsb\n");
+    fprintf(fileASM, "    mov al,'$'\n");
+    fprintf(fileASM, "    mov BYTE PTR [DI],al\n");
+    fprintf(fileASM, "    ret\n");
+    fprintf(fileASM, "COPIAR ENDP\n\n");
+
+    fprintf(fileASM, "END START\n");
 
 
     fclose(fileASM);

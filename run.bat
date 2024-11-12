@@ -8,9 +8,6 @@ gcc.exe lex.yy.c y.tab.c symbol_table.c Tercetos.c Lista.c -o compilador.exe
 
 compilador.exe test.txt
 
-tasm final.asm
-tlink final.obj
-
 @echo off
 del compilador.exe
 del lex.yy.c
