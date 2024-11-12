@@ -1,9 +1,15 @@
-include macros2.asm
 include number.asm
 
+include numbers.asm
+
+include macros.asm
+include macros2.asm
 .MODEL LARGE
 .386
 .STACK 200h
+
+MAXTEXTSIZE equ 256
+
 
 .DATA
 _cte_-1		dd		-1.0
@@ -24,28 +30,28 @@ _cte_65535		dd		65535.0
 @lado1		dd		?
 @lado2		dd		?
 @lado3		dd		?
-@resultado		db 256 dup (?)
-_cte_cad_Equilatero		db		"Equilatero",'$', 3 dup (?)
-_cte_cad_Escaleno		db		"Escaleno",'$', 3 dup (?)
-_cte_cad_Esta_cadena_tiene_exacto:_40_caracteres.		db		"Esta cadena tiene exacto: 40 caracteres.",'$', 3 dup (?)
-_cte_cad_Hola		db		"Hola",'$', 3 dup (?)
-_cte_cad_Isosceles		db		"Isosceles",'$', 3 dup (?)
-_cte_cad_No_se_cumple_la_condicion.		db		"No se cumple la condicion.",'$', 3 dup (?)
+s_@resultado		db MAXTEXTSIZE dup (?), '$'
+_cte_cad_Equilatero		db		"Equilatero",'$', 10 dup (?)
+_cte_cad_Escaleno		db		"Escaleno",'$', 8 dup (?)
+_cte_cad_Esta_cadena_tiene_exacto:_40_caracteres.		db		"Esta cadena tiene exacto: 40 caracteres.",'$', 40 dup (?)
+_cte_cad_Hola		db		"Hola",'$', 4 dup (?)
+_cte_cad_Isosceles		db		"Isosceles",'$', 9 dup (?)
+_cte_cad_No_se_cumple_la_condicion.		db		"No se cumple la condicion.",'$', 26 dup (?)
 _cte_cad_Ok.		db		"Ok.",'$', 3 dup (?)
-_cte_cad_Se_cumple_la_condicion.		db		"Se cumple la condicion.",'$', 3 dup (?)
-_cte_cad_Soy_una_cadena		db		"Soy una cadena",'$', 3 dup (?)
+_cte_cad_Se_cumple_la_condicion.		db		"Se cumple la condicion.",'$', 23 dup (?)
+_cte_cad_Soy_una_cadena		db		"Soy una cadena",'$', 14 dup (?)
 float1		dd		?
 float2		dd		?
 float3		dd		?
 int1		dd		?
 int2		dd		?
-_cte_cad_int2_es_mas_grande_que_int1		db		"int2 es mas grande que int1",'$', 3 dup (?)
+_cte_cad_int2_es_mas_grande_que_int1		db		"int2 es mas grande que int1",'$', 27 dup (?)
 int3		dd		?
 int4		dd		?
-_cte_cad_int4_es_menor_que_int5		db		"int4 es menor que int5",'$', 3 dup (?)
+_cte_cad_int4_es_menor_que_int5		db		"int4 es menor que int5",'$', 22 dup (?)
 int5		dd		?
-string1		db 256 dup (?)
-string2		db 256 dup (?)
+s_string1		db MAXTEXTSIZE dup (?), '$'
+s_string2		db MAXTEXTSIZE dup (?), '$'
 
 .CODE
 mov  AX, @data
@@ -61,8 +67,9 @@ fstp float1
 fld _cte_0.5
 fstp float2
 
-fld _cte_cad_Soy_una_cadena
-fstp string1
+MOV SI, OFFSET _cte_cad_Soy_una_cadena
+MOV DI, OFFSET s_string1
+CALL COPIAR
 
 fld _cte_-32768
 fstp int2
@@ -109,23 +116,18 @@ fdiv
 
 fstp float3
 
-fld _cte_cad_Esta_cadena_tiene_exacto:_40_caracteres.
-fstp string1
+MOV SI, OFFSET _cte_cad_Esta_cadena_tiene_exacto:_40_caracteres.
+MOV DI, OFFSET s_string1
+CALL COPIAR
 
-lea dx, string2
-mov byte ptr [dx], 149
-mov ah, 0Ah
-int 21h
+GetFloat float1
+newLine
 
-mov dx, OFFSET string1
-mov ah, 09h
-int 21h
-newline 1
+displayString s_string1
+newLine
 
-mov dx, OFFSET _cte_cad_Hola
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_Hola
+newLine
 
 fld int1
 fld int2
@@ -145,18 +147,14 @@ sahf
 ffree
 jbe ETIQUETA_[56]
 
-mov dx, OFFSET _cte_cad_Se_cumple_la_condicion.
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_Se_cumple_la_condicion.
+newLine
 
 jmp ETIQUETA_[58]
 
 ETIQUETA_[56]:
-mov dx, OFFSET _cte_cad_No_se_cumple_la_condicion.
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_No_se_cumple_la_condicion.
+newLine
 
 ETIQUETA_[58]:
 fld int2
@@ -178,10 +176,8 @@ ffree
 jbe ETIQUETA_[68]
 
 ETIQUETA_[66]:
-mov dx, OFFSET _cte_cad_Ok.
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_Ok.
+newLine
 
 ETIQUETA_[68]:
 fld int4
@@ -193,10 +189,8 @@ sahf
 ffree
 ja ETIQUETA_[80]
 
-mov dx, OFFSET _cte_cad_int4_es_menor_que_int5
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_int4_es_menor_que_int5
+newLine
 
 fld int4
 fld _cte_1
@@ -216,10 +210,8 @@ sahf
 ffree
 ja ETIQUETA_[98]
 
-mov dx, OFFSET _cte_cad_int2_es_mas_grande_que_int1
-mov ah, 09h
-int 21h
-newline 1
+displayString _cte_cad_int2_es_mas_grande_que_int1
+newLine
 
 ETIQUETA_[87]:
 
@@ -274,8 +266,9 @@ sahf
 ffree
 jne ETIQUETA_[112]
 
-fld _cte_cad_Equilatero
-fstp @resultado
+MOV SI, OFFSET _cte_cad_Equilatero
+MOV DI, OFFSET s_@resultado
+CALL COPIAR
 
 jmp ETIQUETA_[121]
 
@@ -308,17 +301,19 @@ ffree
 jne ETIQUETA_[120]
 
 ETIQUETA_[118]:
-fld _cte_cad_Isosceles
-fstp @resultado
+MOV SI, OFFSET _cte_cad_Isosceles
+MOV DI, OFFSET s_@resultado
+CALL COPIAR
 
 jmp ETIQUETA_[121]
 
 ETIQUETA_[120]:
-fld _cte_cad_Escaleno
-fstp @resultado
+MOV SI, OFFSET _cte_cad_Escaleno
+MOV DI, OFFSET s_@resultado
+CALL COPIAR
 
 ETIQUETA_[121]:
-fld @resultado
+fld s_@resultado
 fstp string2
 
 fld _cte_0

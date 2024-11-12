@@ -36,7 +36,7 @@
 [36] (/; [34]; [35])
 [37] (:=; float3; [36])
 [38] (:=; string1; Esta cadena tiene exacto: 40 caracteres.)
-[39] (string2; _; _)
+[39] (float1; _; _)
 [40] (LEER; [39]; _)
 [41] (string1; _; _)
 [42] (ESCRIBIR; [41]; _)
