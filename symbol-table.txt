@@ -1,44 +1,30 @@
 NOMBRE                                             | TIPODATO                  | VALOR                                         | LONGITUD  
 --------------------------------------------------------------------------------------------------------------------------------------------
--1                                                 |                           | -1                                            |           
--3                                                 |                           | -3                                            |           
--32768                                             |                           | -32768                                        |           
-.5                                                 |                           | .5                                            |           
 0                                                  |                           | 0                                             |           
-0b10                                               |                           | 0b10                                          |           
-0b10101100                                         |                           | 0b10101100                                    |           
-0b110                                              |                           | 0b110                                         |           
 1                                                  |                           | 1                                             |           
-1.5                                                |                           | 1.5                                           |           
-2                                                  |                           | 2                                             |           
-3                                                  |                           | 3                                             |           
-4                                                  |                           | 4                                             |           
+15.0                                               |                           | 15.0                                          |           
 5                                                  |                           | 5                                             |           
-65535                                              |                           | 65535                                         |           
-@contBinarios                                      | Int                       |                                               |           
-@lado1                                             | Float                     |                                               |           
-@lado2                                             | Float                     |                                               |           
-@lado3                                             | Float                     |                                               |           
-@resultado                                         | String                    |                                               |           
+50                                                 |                           | 50                                            |           
+70.7                                               |                           | 70.7                                          |           
 Binarioxd                                          | Binario                   |                                               |           
-Equilatero                                         |                           | Equilatero                                    | 10        
-Escaleno                                           |                           | Escaleno                                      | 8         
-Esta cadena tiene exacto: 40 caracteres.           |                           | Esta cadena tiene exacto: 40 caracteres.      | 40        
+El numero ingresado NO es > 0 y < 50               |                           | El numero ingresado NO es > 0 y < 50          | 36        
+El numero ingresado es > 0 y < 50                  |                           | El numero ingresado es > 0 y < 50             | 33        
+El resultado de la suma es                         |                           | El resultado de la suma es                    | 26        
+Estas probando el proyecto del grupo 14            |                           | Estas probando el proyecto del grupo 14       | 39        
 Hola                                               |                           | Hola                                          | 4         
-Isosceles                                          |                           | Isosceles                                     | 9         
-No se cumple la condicion.                         |                           | No se cumple la condicion.                    | 26        
-Ok.                                                |                           | Ok.                                           | 3         
-Se cumple la condicion.                            |                           | Se cumple la condicion.                       | 23        
-Soy una cadena                                     |                           | Soy una cadena                                | 14        
+Ingrese un float                                   |                           | Ingrese un float                              | 16        
+Ingrese un int                                     |                           | Ingrese un int                                | 14        
+Ingrese un numero entero                           |                           | Ingrese un numero entero                      | 24        
+Ingrese un string                                  |                           | Ingrese un string                             | 17        
+Su float es menor a 15.0 o mayor a 70.7            |                           | Su float es menor a 15.0 o mayor a 70.7       | 39        
 float1                                             | Float                     |                                               |           
 float2                                             | Float                     |                                               |           
 float3                                             | Float                     |                                               |           
 int1                                               | Int                       |                                               |           
 int2                                               | Int                       |                                               |           
-int2 es mas grande que int1                        |                           | int2 es mas grande que int1                   | 27        
 int3                                               | Int                       |                                               |           
 int4                                               | Int                       |                                               |           
-int4 es menor que int5                             |                           | int4 es menor que int5                        | 22        
 int5                                               | Int                       |                                               |           
 string1                                            | String                    |                                               |           
 string2                                            | String                    |                                               |           
+suma                                               | Int                       |                                               |           

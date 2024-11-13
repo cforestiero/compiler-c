@@ -2,7 +2,7 @@ init
 
 {
 
-    int1, int2, int3, int4, int5 : Int
+    int1, int2, int3, int4, int5, suma : Int
 
     float1, float2, float3: Float
 
@@ -12,95 +12,61 @@ init
 
 }
 
-Binarioxd := 0b10
+escribir("Hola")
+escribir("Estas probando el proyecto del grupo 14")
 
-int1 := 1
-
-float1 := 1.5
-
-float2 := .5
-
-string1 := "Soy una cadena"
- 
-*- Verificacion de cotas para un entero de 16 bits-*
-
-int2 := -32768
-
-int3 := 65535
- 
- 
-*- Testeamos operaciones aritmeticas -*
- 
-int1 := 2 + 4
-
-int2 := int1 - 1
-
-int3 := -1--3
-
-int4 := int3 * -1
-
-int5 := 1 + (2*3)
-
-float3 := float1 / float2
-
-string1 := "Esta cadena tiene exacto: 40 caracteres."
- 
-leer(string2)
-
+escribir("Ingrese un string")
+leer(string1)
 escribir(string1)
 
-escribir("Hola")
+escribir("Ingrese un float")
+leer(float1)
 
-si (int1 > int2 AND int3 > int4)
+float2 := 70.7
+
+si (float1 < 15.0 OR float1 > float2)
 
 {
 
-    escribir("Se cumple la condicion.")
+    escribir("Su float es menor a 15.0 o mayor a 70.7")
+
+}
+
+escribir("Ingrese un int")
+
+leer(int1)
+
+
+si (int1 > 0 AND int1 < 50)
+
+{
+
+    escribir("El numero ingresado es > 0 y < 50")
 
 }
 
 sino{
 
-	escribir("No se cumple la condicion.")
+	escribir("El numero ingresado NO es > 0 y < 50")
 
 }
- 
-si (int2 > int3 OR int4 > int1)
 
+
+int2 := 5
+suma := 0
+
+mientras (NOT int2 == 0)
 {
 
-    escribir("Ok.")
+    escribir("Ingrese un numero entero")
+    leer(int3)
+
+    suma := suma + int3
+    int2 := int2 - 1
 
 }
- 
- 
-mientras (NOT int4 > int5)
 
-{
 
-    escribir("int4 es menor que int5")
+escribir("El resultado de la suma es")
+escribir(int3)
 
-    int4 := int4 + 1
-
-}
- 
-mientras (NOT int1 > int2)
-{
-
-    	escribir("int2 es mas grande que int1")
-
-	mientras (int1 > int3)
-
-	{
-
-        	int1 := int1 + 1
-
-	}
-
-}
- 
-*- Testeamos las funciones especiales -*
-
-string2 := triangulo(5, 1+1, float1)
-int3 := binaryCount([0b110,5,0,int1,int4,0b10101100,-1,Binarioxd])
- 

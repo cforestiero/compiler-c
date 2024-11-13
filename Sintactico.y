@@ -21,6 +21,7 @@ char* formatearComparador(char* comparador);
 void reemplazarEspaciosPorGuionBajo(char* str);
 int compararIndices(const void* a, const void* b);
 int compararEtiq(const void* a, const void* b);
+void eliminar_corchetes(char *texto);
 void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
@@ -665,7 +666,7 @@ factor:
 
                 char *tipoObtenido;
                 tipoObtenido = retornarTipoDeDato($1);
-                if(strcmp(tipoObtenido,"String") == 0){
+                if(strcmp(tipoObtenido,"String") == 0 || strcmp(tipoObtenido,"Binario") == 0){
                      printf("ERROR SEMANTICO: Asignacion incorrecta.\n");
                      exit(1);   
                 }
@@ -798,6 +799,7 @@ elemento:
                         int aux2 = agregarTerceto("1", "_","_");
                         ElementoInd= agregarTerceto("+", formatear(aux1), formatear(aux2));
                         agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));  
+                        agregarSimbolo("1","","1","");
                 }
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
                 
@@ -816,6 +818,7 @@ elemento:
                 int aux2 = agregarTerceto("1", "_","_");
                 ElementoInd= agregarTerceto("+", formatear(aux1), formatear(aux2));
                 agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));
+                agregarSimbolo("1","","1","");
         }
         ;
 
@@ -876,6 +879,8 @@ void reemplazarEspaciosPorGuionBajo(char* str) {
 
 void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
    
+        printf("GENERO ASSEMBLER\n");
+
     FILE *fileASM = fopen(nombre_archivo_asm, "w");
 
     if (fileASM == NULL) {
@@ -932,10 +937,11 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 } else {   //no cadena
                         if(strchr(_simbolo->valor, '.') == NULL){             //es int 
-                                if(_simbolo->valor[1] == 'b') {                 //es binario  
-                                        fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t%s\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                if(strncmp(_simbolo->valor, "0b", 2) == 0) {                 //es binario  
+                                        fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t\"%s\",'$', MAXTEXTSIZE dup (?)\n", _simbolo->nombre, _simbolo->valor);
                                         strcpy(dato.indice, _simbolo->nombre);
                                         sprintf(dato.variable, "_cte_bin_%s", _simbolo->nombre);
+                                        printf("GUARDO CTE CON EL INDICE: %s\n",dato.indice);
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                                 else {
@@ -984,12 +990,14 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
     char operadorIzq[50], operadorDer[50];
     char etiquetaComparacion[50];
     int band;
+    
+    terceto* _terceto;
 
     while (current != NULL) {
-        terceto* _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
+        _terceto = (terceto*)current->dato;  // Obtener el terceto desde el nodo
         band = 0;
         
-        sprintf(etiquetaComparacion, "[%d]", _terceto->indice);
+        sprintf(etiquetaComparacion, "%d", _terceto->indice);
 
         if(buscarPorClaveGuardaDatos(&pilaCiclos, &etiquetaComparacion, sizeof(etiquetaComparacion), compararEtiq) >= 0 ){
                 fprintf(fileASM, "ETIQUETA_%s:\n", etiquetaComparacion);
@@ -998,15 +1006,18 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 band = 1;
         }
 
-        if (strcmp(_terceto->operando, "+") == 0) {
+        if (strcmp(_terceto->operando, "+") == 0) {     //SUMA
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
+
+                printf("DER: %s     IZQ: %s\n", operadorDer, operadorIzq);
 
                 if(strcmp(operadorIzq, "@@@") != 0){
                         //cargo a st(1) = izq
                         strcpy(dato.indice, operadorIzq);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        printf("IZQ ENCONTRADO %s\n", dato.variable);
                 }
 
                 if(strcmp(operadorDer, "@@@") != 0) {
@@ -1014,12 +1025,13 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         strcpy(dato.indice, operadorDer);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        printf("DER ENCONTRADO %s\n", dato.variable);
                 }
 
                 fprintf(fileASM, "fadd\n\n");
                 insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
         }
-        else if (strcmp(_terceto->operando, "-") == 0) {
+        else if (strcmp(_terceto->operando, "-") == 0) {        //RESTA
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
 
@@ -1084,12 +1096,12 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 insertarListaAlFinal(&pilaASM, "@@@", sizeof("@@@"));
                 
         } 
-        else if (strcmp(_terceto->operando, ":=") == 0) {
+        else if (strcmp(_terceto->operando, ":=") == 0) {       //ASIGNACION
                 strcpy(dato.indice, _terceto->operadorDer);
                 int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
         
                 if (result >= 0) {                      //si existe en tabla de simbolos (cadena o en binarycount) se asigna directo
-                        if(strncmp(dato.variable, "_cte_cad_", 9) == 0) { //es cad
+                        //es cad o bin
                                 fprintf(fileASM, "MOV SI, OFFSET %s\n", dato.variable);
 
                                 strcpy(dato.indice, _terceto->operadorIzq);
@@ -1098,13 +1110,6 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                                 fprintf(fileASM, "MOV DI, OFFSET %s\n", dato.variable);
                                 fprintf(fileASM, "CALL COPIAR\n\n");
 
-                        } else { //binary
-                                fprintf(fileASM, "fld %s\n", dato.variable);
-
-                                strcpy(dato.indice, _terceto->operadorIzq);
-                                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
-                                fprintf(fileASM, "fstp %s\n\n", dato.variable);
-                        }
                 } else {
                         eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
 
@@ -1125,7 +1130,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 strcpy(dato.indice, operadorIzq);
                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
 
-                if(strncmp(dato.variable, "s_", 2) == 0){ //id strings
+                if(strncmp(dato.variable, "s_", 2) == 0 || strncmp(dato.variable, "bin_", 4) == 0){ //id strings
                         fprintf(fileASM, "getString %s\n", dato.variable);
                         fprintf(fileASM, "newLine\n\n");
                 } else { //float
@@ -1138,7 +1143,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 strcpy(dato.indice, operadorIzq);
                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
 
-                if(strncmp(dato.variable, "s_", 2) == 0 || strncmp(dato.variable, "_cte_cad_", 9) == 0){ //strings
+                if(strncmp(dato.variable, "s_", 2) == 0 || strncmp(dato.variable, "_cte_cad_", 9) == 0 || strncmp(dato.variable, "bin_", 4) == 0 ){ //strings o bin
                         fprintf(fileASM, "displayString %s\n", dato.variable);
                         fprintf(fileASM, "newLine\n\n");
                 } else { //float
@@ -1179,50 +1184,68 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
 
         } 
         else if (strcmp(_terceto->operando, "BGE") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "jae ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
                 
         } 
         else if (strcmp(_terceto->operando, "BGT") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "ja ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
                 
         } 
         else if (strcmp(_terceto->operando, "BLE") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "jbe ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
                 
         } 
         else if (strcmp(_terceto->operando, "BLT") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "jb ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
                 
         } 
         else if (strcmp(_terceto->operando, "BEQ") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "je ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
         
         } 
         else if (strcmp(_terceto->operando, "BNE") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "jne ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
                 
         } 
         else if (strcmp(_terceto->operando, "BI") == 0) {
+                eliminar_corchetes(_terceto->operadorIzq);
                 fprintf(fileASM, "jmp ETIQUETA_%s\n\n",_terceto->operadorIzq);
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
         } 
         else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0 && band == 0){
-                sprintf(etiquetaComparacion, "[%d]", _terceto->indice);
+                eliminar_corchetes(_terceto->operadorIzq);
+                sprintf(etiquetaComparacion, "%d", _terceto->indice);
                 fprintf(fileASM, "ETIQUETA_%s:\n\n",etiquetaComparacion);
         }
         else {  //apilo comando
                 insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
+                printf("APILO OPERANDO %s\n", _terceto->operando);
         }
 
         // Avanzar al siguiente nodo
         current = current->sig;
     } 
+
+    sprintf(etiquetaComparacion, "%d", _terceto->indice + 1);
+    
+    if(buscarPorClaveGuardaDatos(&pilaCiclos, &etiquetaComparacion, sizeof(etiquetaComparacion), compararEtiq) >= 0 ){
+        fprintf(fileASM, "ETIQUETA_%s:\n", etiquetaComparacion);
+
+        eliminarDesordPorClave(&pilaCiclos, &etiquetaComparacion, sizeof(etiquetaComparacion), compararEtiq);
+        band = 1;
+        }
 
     fprintf(fileASM, "mov  ax, 4c00h\n");
     fprintf(fileASM, "int  21h\n");
@@ -1280,5 +1303,13 @@ int compararEtiq(const void* a, const void* b) {
     return strcmpi(d1, d2);
 }
 
-
+void eliminar_corchetes(char *texto) {
+    int j = 0;
+    for (int i = 0; i < strlen(texto); i++) {
+        if (texto[i] != '[' && texto[i] != ']') {
+            texto[j++] = texto[i];
+        }
+    }
+    texto[j] = '\0';  // Termina la nueva cadena sin corchetes
+}
 
