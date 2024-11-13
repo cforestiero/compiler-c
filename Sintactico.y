@@ -70,7 +70,7 @@ typedef struct {
 %token <s> CTE_ENTERA
 %token <s> CTE_REAL
 %token <s> CTE_CADENA
-%token CTE_BINARIA
+%token <s> CTE_BINARIA
 %token <s> ID
 %token OP_ASIG
 %token OP_SUM
@@ -102,6 +102,7 @@ typedef struct {
 %token FLOAT
 %token INT
 %token STRING
+%token BINARIO
 %token AND
 %token OR
 %token NOT
@@ -201,6 +202,8 @@ tipo_de_dato:
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> FLOAT\n\n");}
         | STRING { 
                 printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> STRING\n\n");}
+        | BINARIO { 
+                printf("                El analizador sintactico reconoce: <Tipo_de_dato> --> BINARIO\n\n");}
         ;
 
 sentencia:
@@ -241,6 +244,11 @@ asignacion:
 
                 if(strcmp(tipoObtenido,"String")==0){
                      printf("ERROR SEMANTICO: %s es del tipo String, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
+
+                if(strcmp(tipoObtenido,"Binario")==0){
+                     printf("ERROR SEMANTICO: %s es del tipo Binario, asignacion invalida.\n", $1);
                      exit(1);   
                 }
 
@@ -303,6 +311,21 @@ asignacion:
                 AsignacionInd = agregarTerceto(":=", $1, $3);
                 
                 printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_CADENA\n\n");
+        }
+
+        | ID OP_ASIG CTE_BINARIA {
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+                if(strcmp(tipoObtenido,"Binario")!=0){
+                     printf("ERROR SEMANTICO: %s no es del tipo Binario, asignacion invalida.\n", $1);
+                     exit(1);   
+                }
+                AsignacionInd = agregarTerceto(":=", $1, $3);
+                
+                printf("                El analizador sintactico reconoce: <Asignacion> --> ID OP_ASIG CTE_BINARIA\n\n");
         }
         ;
 
@@ -765,6 +788,17 @@ lista:
 
 elemento:
         ID {
+                if(validarVariableDeclarada($1) != TODO_OK){
+                        exit(1);
+                }
+                char *tipoObtenido;
+                tipoObtenido = retornarTipoDeDato($1);
+                if(strcmp(tipoObtenido,"Binario")==0){
+                        int aux1 = agregarTerceto("@contBinarios", "_","_");
+                        int aux2 = agregarTerceto("1", "_","_");
+                        ElementoInd= agregarTerceto("+", formatear(aux1), formatear(aux2));
+                        agregarTerceto(":=", "@contBinarios", formatear(ElementoInd));  
+                }
                 printf("                El analizador sintactico reconoce: <Elemento> --> ID\n\n");
                 
         }
@@ -877,6 +911,11 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         fprintf(fileASM, "s_%s\t\tdb MAXTEXTSIZE dup (?), '$'\n", _simbolo->nombre); //ids
                         strcpy(dato.indice, _simbolo->nombre);
                         sprintf(dato.variable, "s_%s", _simbolo->nombre);
+                        insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
+                } else if(strcmp(_simbolo->tipo_de_dato, "Binario") == 0) {
+                        fprintf(fileASM, "bin_%s\t\tdd\t\t?\n", _simbolo->nombre); //ids bin
+                        strcpy(dato.indice, _simbolo->nombre);
+                        sprintf(dato.variable, "bin_%s", _simbolo->nombre);
                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 } else {
                         fprintf(fileASM, "%s\t\tdd\t\t?\n", _simbolo->nombre); //ids
@@ -1061,7 +1100,10 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
 
                         } else { //binary
                                 fprintf(fileASM, "fld %s\n", dato.variable);
-                                fprintf(fileASM, "fstp %s\n\n", _terceto->operadorIzq);
+
+                                strcpy(dato.indice, _terceto->operadorIzq);
+                                buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
+                                fprintf(fileASM, "fstp %s\n\n", dato.variable);
                         }
                 } else {
                         eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));

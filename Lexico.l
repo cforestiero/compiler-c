@@ -65,6 +65,7 @@ COMP_DISTINTO   "!="
 "Float"         {printf("El analizador lexico reconoce a: %s como Float\n", yytext); yylval.s = strdup(yytext); return FLOAT;}
 "Int"           {printf("El analizador lexico reconoce a: %s como Int\n", yytext);yylval.s = strdup(yytext); return INT;}
 "String"        {printf("El analizador lexico reconoce a: %s como String\n", yytext); yylval.s = strdup(yytext);return STRING;}
+"Binario"       {printf("El analizador lexico reconoce a: %s como Binario\n", yytext); yylval.s = strdup(yytext);return BINARIO;}
 "AND"           {printf("El analizador lexico reconoce a: %s como And\n", yytext); return AND;}
 "OR"            {printf("El analizador lexico reconoce a: %s como Or\n", yytext); return OR;}
 "NOT"           {printf("El analizador lexico reconoce a: %s como Not\n", yytext); return NOT;}
