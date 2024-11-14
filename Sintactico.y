@@ -488,9 +488,8 @@ comparacion:
 
                 agregarTerceto("CMP",formatear(ComparacionInd),formatear(ExpresionInd));
                 
-                char auxComparador[2];
+                char auxComparador[3];
                 verUltimoLista(&ListaComparadores, auxComparador, sizeof(auxComparador));
-                printf("EL COMPARADOR ES %s\n", auxComparador);
                 ComparacionInd = agregarTerceto(formatearComparador(auxComparador), "_", "_");
 
                 eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
@@ -510,19 +509,19 @@ comparador:
                 printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENOR\n\n");
         }
         | COMP_MAYORIGUAL {
-                insertarListaAlFinal(&ListaComparadores, ">=", sizeof(char[2]));
+                insertarListaAlFinal(&ListaComparadores, ">=", sizeof(char[3]));
                 printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MAYORIGUAL\n\n");
         }
         | COMP_MENORIGUAL {
-                insertarListaAlFinal(&ListaComparadores, "<=", sizeof(char[2]));
+                insertarListaAlFinal(&ListaComparadores, "<=", sizeof(char[3]));
                 printf("                El analizador sintactico reconoce: <Comparador> --> COMP_MENORIGUAL\n\n");
         }
         | COMP_IGUAL { 
-                insertarListaAlFinal(&ListaComparadores, "==", sizeof(char[2]));
+                insertarListaAlFinal(&ListaComparadores, "==", sizeof(char[3]));
                 printf("                El analizador sintactico reconoce: <Comparador> --> COMP_IGUAL\n\n");
         }
         | COMP_DISTINTO {
-                insertarListaAlFinal(&ListaComparadores, "!=", sizeof(char[2]));
+                insertarListaAlFinal(&ListaComparadores, "!=", sizeof(char[3]));
                 printf("                El analizador sintactico reconoce: <Comparador> --> COMP_DISTINTO\n\n");
         }
         ; 
@@ -536,7 +535,6 @@ iteracion:
         condicion PAR_C LLAVE_A bloque {
                 int auxCompracion;
                 eliminarUltimo(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
-                printf("AUX COMPARACION %d\n",auxCompracion);
                 int auxIndice, auxIndice2;
                 int aux_etiqueta_while;
 
@@ -862,8 +860,7 @@ char* formatear(int indice) {
 }
 
 char* formatearComparador(char* comparador) {
-    
-    printf("COMAPRADORR %s\n", comparador);
+    printf("COMPARADOR %s\n", comparador);
     if (strcmp(comparador, "<") == 0) return "BGE";
     if (strcmp(comparador, ">") == 0) return "BLE";
     if (strcmp(comparador, "==") == 0) return "BNE";
@@ -883,8 +880,6 @@ void reemplazarEspaciosPorGuionBajo(char* str) {
 }
 
 void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos) {
-   
-        printf("GENERO ASSEMBLER\n");
 
     FILE *fileASM = fopen(nombre_archivo_asm, "w");
 
@@ -948,7 +943,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                                         fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t\"%s\",'$', MAXTEXTSIZE dup (?)\n", _simbolo->nombre, _simbolo->valor);
                                         strcpy(dato.indice, _simbolo->nombre);
                                         sprintf(dato.variable, "_cte_bin_%s", _simbolo->nombre);
-                                        printf("GUARDO CTE CON EL INDICE: %s\n",dato.indice);
+                                        
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                                 else {                  //es int
@@ -971,7 +966,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                                         reemplazarPuntoPorGuionBajo(_simbolo->nombre);
                                         fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
                                         sprintf(dato.variable, "_cte_%s", _simbolo->nombre);
-                                        printf("GUARDO CTE CON EL INDICE: %s\n",dato.indice);
+                                        
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                         }
@@ -1021,14 +1016,16 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
 
-                printf("DER: %s     IZQ: %s\n", operadorDer, operadorIzq);
+                
 
                 if(strcmp(operadorIzq, "@@@") != 0){
                         //cargo a st(1) = izq
                         strcpy(dato.indice, operadorIzq);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                         fprintf(fileASM, "fld %s\n", dato.variable);
-                        printf("IZQ ENCONTRADO %s\n", dato.variable);
+                        if(strcmp(operadorDer, "@@@") == 0){
+                                fprintf(fileASM, "fxch\n");
+                        }
                 }
 
                 if(strcmp(operadorDer, "@@@") != 0) {
@@ -1036,7 +1033,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         strcpy(dato.indice, operadorDer);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
                         fprintf(fileASM, "fld %s\n", dato.variable);
-                        printf("DER ENCONTRADO %s\n", dato.variable);
+                        
                 }
 
                 fprintf(fileASM, "fadd\n\n");
@@ -1051,6 +1048,9 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         strcpy(dato.indice, operadorIzq);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        if(strcmp(operadorDer, "@@@") == 0){
+                                fprintf(fileASM, "fxch\n");
+                        }
                 }
 
                 if(strcmp(operadorDer, "@@@") != 0) {
@@ -1058,6 +1058,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         strcpy(dato.indice, operadorDer);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        
                 }
 
                 fprintf(fileASM, "fsub\n\n");
@@ -1072,13 +1073,16 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                         strcpy(dato.indice, operadorIzq);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        if(strcmp(operadorDer, "@@@") == 0){
+                                fprintf(fileASM, "fxch\n");
+                        }
                 }
 
                 if(strcmp(operadorDer, "@@@") != 0) {
                         //cargo a st(0) = der
                         strcpy(dato.indice, operadorDer);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
-                        fprintf(fileASM, "fld %s\n", dato.variable);
+                        fprintf(fileASM, "fld %s\n", dato.variable);                        
                 }
 
                 fprintf(fileASM, "fmul\n\n");
@@ -1089,20 +1093,26 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
 
-                printf("DER: %s     IZQ: %s\n", operadorDer, operadorIzq);
-
                 if(strcmp(operadorIzq, "@@@") != 0){
                         //cargo a st(1) = izq
                         strcpy(dato.indice, operadorIzq);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        if(strcmp(operadorDer, "@@@") == 0){
+                                fprintf(fileASM, "fxch\n");
+                        }
+
+
+                        
                 }
 
                 if(strcmp(operadorDer, "@@@") != 0) {
+                        
                         //cargo a st(0) = der
                         strcpy(dato.indice, operadorDer);
                         buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);
                         fprintf(fileASM, "fld %s\n", dato.variable);
+                        
                 }
 
                 fprintf(fileASM, "fdiv\n\n");
@@ -1165,33 +1175,26 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 }
         } 
         else if (strcmp(_terceto->operando, "CMP") == 0) {
-                if(strcmp(_terceto->operadorDer, "es_binario") == 0){
-                        eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
-
-                        //ver que hacems ==> es bin
-                } else {
+                
                         strcpy(dato.indice, _terceto->operadorIzq); //ver si son ids
                         int result = buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices);  //si son ids estan
                         if (result < 0) { //si no estan ==> son indices y tengo que desapilar
                                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer));
                                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
 
-                                printf("OP DER ES %s\n",operadorDer);
-                                printf("OP IZQ ES %s\n",operadorIzq);
                                 strcpy(dato.indice, operadorIzq);
                                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                                 fprintf(fileASM, "fld %s\n", dato.variable);
-                                printf("DATO ES %s\n", dato.variable);
 
                                 strcpy(dato.indice, operadorDer);
                                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                                 fprintf(fileASM, "fld %s\n", dato.variable);
-                                printf("DATO ES %s\n", dato.variable);
+                                
                         } else { //estan en el CMP
                                 fprintf(fileASM, "fld %s\n", _terceto->operadorIzq);
-                                fprintf(fileASM, "fstp %s\n", _terceto->operadorDer);
+                                fprintf(fileASM, "fld %s\n", _terceto->operadorDer);
                         }  
-                }
+                
 
                 fprintf(fileASM, "fxch\n");
                 fprintf(fileASM, "fcom\n");
@@ -1247,7 +1250,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
         }
         else {  //apilo comando
                 insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
-                printf("APILO OPERANDO %s\n", _terceto->operando);
+                
         }
 
         // Avanzar al siguiente nodo
