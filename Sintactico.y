@@ -1089,6 +1089,8 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer)); //leo der
                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq)); //leo izq
 
+                printf("DER: %s     IZQ: %s\n", operadorDer, operadorIzq);
+
                 if(strcmp(operadorIzq, "@@@") != 0){
                         //cargo a st(1) = izq
                         strcpy(dato.indice, operadorIzq);
@@ -1240,13 +1242,12 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                 insertarListaAlFinal(&pilaCiclos, &_terceto->operadorIzq, sizeof(_terceto->operadorIzq));
         } 
         else if (strncmp(_terceto->operando, "ETIQUETA", 8) == 0 && band == 0){
-                eliminar_corchetes(_terceto->operadorIzq);
                 sprintf(etiquetaComparacion, "%d", _terceto->indice);
                 fprintf(fileASM, "ETIQUETA_%s:\n\n",etiquetaComparacion);
         }
         else {  //apilo comando
                 insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
-                //("APILO OPERANDO %s\n", _terceto->operando);
+                printf("APILO OPERANDO %s\n", _terceto->operando);
         }
 
         // Avanzar al siguiente nodo
