@@ -1,5 +1,4 @@
 init 
-
 {
 
     int1, int2, int3, int4, int5, suma : Int
@@ -8,18 +7,18 @@ init
 
     string1, string2: String
 
-    Binarioxd: Binario
+    bin1: Binario
 
 }
 
-escribir("Hola")
+escribir("Hola!")
 escribir("Estas probando el proyecto del grupo 14")
 
-escribir("Ingrese un string")
+escribir("Ingrese un string:")
 leer(string1)
 escribir(string1)
 
-escribir("Ingrese un float")
+escribir("Ingrese un float:")
 leer(float1)
 
 float2 := 70.7
@@ -32,10 +31,9 @@ si (float1 < 15.0 OR float1 > float2)
 
 }
 
-escribir("Ingrese un int")
+escribir("Ingrese un int:")
 
 leer(int1)
-
 
 si (int1 > 0 AND int1 < 50)
 
@@ -51,11 +49,10 @@ sino{
 
 }
 
-
-int2 := 5
+int2 := 3
 suma := 0
 
-mientras (NOT int2 == 0)
+mientras (NOT int2 <= 0)
 {
 
     escribir("Ingrese un numero entero")
@@ -66,7 +63,37 @@ mientras (NOT int2 == 0)
 
 }
 
+int1 := 1
+int2 := 3
+mientras ( int1 < 3)
+{
 
-escribir("El resultado de la suma es")
+    mientras (int2 != 0)
+	{
+    	escribir(int2)
+	    int2 := int2 - 1
+	}
+	escribir(int1)
+	int1 := int1 + 1
+}
+
+int4 := 100
+int5 := 150 + 25*2 - int4 
+int5 := int5 / ( 3 + 2 )
+
+escribir(int5)
+
+int3 := 6
+
+string2 := triangulo(3 + 3, 2, int3)
+escribir("El triangulo es:")
+escribir(string2)
+escribir(" ")
+
+
+bin1 := 0b1001
+
+int3 := binaryCount([0b110,15,0,int1,bin1,0b10101100])
+escribir("La cantidad")
 escribir(int3)
 

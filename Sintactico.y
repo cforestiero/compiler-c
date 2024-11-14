@@ -22,6 +22,8 @@ void reemplazarEspaciosPorGuionBajo(char* str);
 int compararIndices(const void* a, const void* b);
 int compararEtiq(const void* a, const void* b);
 void eliminar_corchetes(char *texto);
+void reemplazarPuntoPorGuionBajo(char *cadena);
+void reemplazarGuionMedioPorGuionBajo(char *cadena);
 void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, char* nombre_archivo_tercetos);
 
 char* nombre_archivo_tabla = "symbol-table.txt";
@@ -488,6 +490,7 @@ comparacion:
                 
                 char auxComparador[2];
                 verUltimoLista(&ListaComparadores, auxComparador, sizeof(auxComparador));
+                printf("EL COMPARADOR ES %s\n", auxComparador);
                 ComparacionInd = agregarTerceto(formatearComparador(auxComparador), "_", "_");
 
                 eliminarUltimo(&ListaComparadores, auxComparador, sizeof(auxComparador));
@@ -533,7 +536,7 @@ iteracion:
         condicion PAR_C LLAVE_A bloque {
                 int auxCompracion;
                 eliminarUltimo(&ListaCondicionesTipo, &auxCompracion, sizeof(int));
-
+                printf("AUX COMPARACION %d\n",auxCompracion);
                 int auxIndice, auxIndice2;
                 int aux_etiqueta_while;
 
@@ -859,10 +862,12 @@ char* formatear(int indice) {
 }
 
 char* formatearComparador(char* comparador) {
+    
+    printf("COMAPRADORR %s\n", comparador);
     if (strcmp(comparador, "<") == 0) return "BGE";
     if (strcmp(comparador, ">") == 0) return "BLE";
-    if (strcmp(comparador, "=") == 0) return "BNE";
-    if (strcmp(comparador, "!") == 0) return "BEQ";
+    if (strcmp(comparador, "==") == 0) return "BNE";
+    if (strcmp(comparador, "!=") == 0) return "BEQ";
     if (strcmp(comparador, "<=") == 0) return "BGT";
     if (strcmp(comparador, ">=") == 0) return "BLT";
     return "Invalid comparator";
@@ -906,6 +911,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
 
     Nodo* current = dataLista;  // Aquí 'data' es de tipo Lista (puntero a Nodo)
     datoAsm dato;
+    int contCteCad=1;
 
     while (current != NULL) {
         simbolo* _simbolo = (simbolo*)current->dato;  // Obtener el símbolo desde el nodo
@@ -931,12 +937,13 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
         } else {                                                        //ctes
                 if(_simbolo->longitud[0] != '\0'){                          //tiene longitud ==> es cadena
                         reemplazarEspaciosPorGuionBajo(_simbolo->nombre);
-                        fprintf(fileASM, "_cte_cad_%s\t\tdb\t\t\"%s\",'$', %s dup (?)\n", _simbolo->nombre, _simbolo->valor, _simbolo->longitud);
+                        fprintf(fileASM, "_cte_cad_%d\t\tdb\t\t\"%s\",'$', %s dup (?)\n", contCteCad, _simbolo->valor, _simbolo->longitud);
                         strcpy(dato.indice, _simbolo->valor);
-                        sprintf(dato.variable, "_cte_cad_%s", _simbolo->nombre);
+                        sprintf(dato.variable, "_cte_cad_%d", contCteCad);
+                        contCteCad++;
                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                 } else {   //no cadena
-                        if(strchr(_simbolo->valor, '.') == NULL){             //es int 
+                        if(strchr(_simbolo->valor, '.') == NULL){              
                                 if(strncmp(_simbolo->valor, "0b", 2) == 0) {                 //es binario  
                                         fprintf(fileASM, "_cte_bin_%s\t\tdb\t\t\"%s\",'$', MAXTEXTSIZE dup (?)\n", _simbolo->nombre, _simbolo->valor);
                                         strcpy(dato.indice, _simbolo->nombre);
@@ -944,23 +951,27 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                                         printf("GUARDO CTE CON EL INDICE: %s\n",dato.indice);
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
-                                else {
-                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s.0\n", _simbolo->nombre, _simbolo->valor); //paso a float
+                                else {                  //es int
                                         strcpy(dato.indice, _simbolo->nombre);
+                                        reemplazarGuionMedioPorGuionBajo(_simbolo->nombre);
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s.0\n", _simbolo->nombre, _simbolo->valor); //paso a float
                                         sprintf(dato.variable, "_cte_%s", _simbolo->nombre);
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }                               
                         } else{
                                 if(_simbolo->valor[0] == '.') {// .5 ==> agrego cero ==> 0.5
-                                        fprintf(fileASM, "_cte_0%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
                                         strcpy(dato.indice, _simbolo->nombre);
+                                        reemplazarPuntoPorGuionBajo(_simbolo->nombre);
+                                        fprintf(fileASM, "_cte_0%s\t\tdd\t\t0%s\n", _simbolo->nombre, _simbolo->valor);
                                         sprintf(dato.variable, "_cte_0%s", _simbolo->nombre);
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                                 else {
-                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
                                         strcpy(dato.indice, _simbolo->nombre);
+                                        reemplazarPuntoPorGuionBajo(_simbolo->nombre);
+                                        fprintf(fileASM, "_cte_%s\t\tdd\t\t%s\n", _simbolo->nombre, _simbolo->valor);
                                         sprintf(dato.variable, "_cte_%s", _simbolo->nombre);
+                                        printf("GUARDO CTE CON EL INDICE: %s\n",dato.indice);
                                         insertarListaAlFinal(&ListaVariables,&dato,sizeof(dato));
                                 }
                         }
@@ -1163,13 +1174,17 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
                                 eliminarUltimo(&pilaASM, &operadorDer, sizeof(operadorDer));
                                 eliminarUltimo(&pilaASM, &operadorIzq, sizeof(operadorIzq));
 
+                                printf("OP DER ES %s\n",operadorDer);
+                                printf("OP IZQ ES %s\n",operadorIzq);
                                 strcpy(dato.indice, operadorIzq);
                                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                                 fprintf(fileASM, "fld %s\n", dato.variable);
+                                printf("DATO ES %s\n", dato.variable);
 
                                 strcpy(dato.indice, operadorDer);
                                 buscarPorClaveGuardaDatos(&ListaVariables, &dato, sizeof(dato), compararIndices); 
                                 fprintf(fileASM, "fld %s\n", dato.variable);
+                                printf("DATO ES %s\n", dato.variable);
                         } else { //estan en el CMP
                                 fprintf(fileASM, "fld %s\n", _terceto->operadorIzq);
                                 fprintf(fileASM, "fstp %s\n", _terceto->operadorDer);
@@ -1231,7 +1246,7 @@ void generar_assembler(char* nombre_archivo_asm, char* nombre_archivo_tabla, cha
         }
         else {  //apilo comando
                 insertarListaAlFinal(&pilaASM, _terceto->operando, sizeof(_terceto->operando));
-                printf("APILO OPERANDO %s\n", _terceto->operando);
+                //("APILO OPERANDO %s\n", _terceto->operando);
         }
 
         // Avanzar al siguiente nodo
@@ -1313,3 +1328,21 @@ void eliminar_corchetes(char *texto) {
     texto[j] = '\0';  // Termina la nueva cadena sin corchetes
 }
 
+void reemplazarPuntoPorGuionBajo(char *cadena) {
+    while (*cadena) {
+        if (*cadena == '.') {
+            *cadena = '_';
+        }
+        cadena++;
+    }
+}
+
+
+void reemplazarGuionMedioPorGuionBajo(char *cadena) {
+    while (*cadena) {
+        if (*cadena == '-') {
+            *cadena = '_';
+        }
+        cadena++;
+    }
+}

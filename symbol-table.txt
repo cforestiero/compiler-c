@@ -1,22 +1,41 @@
 NOMBRE                                             | TIPODATO                  | VALOR                                         | LONGITUD  
 --------------------------------------------------------------------------------------------------------------------------------------------
+                                                   |                           |                                               | 1         
 0                                                  |                           | 0                                             |           
+0b1001                                             |                           | 0b1001                                        |           
+0b10101100                                         |                           | 0b10101100                                    |           
+0b110                                              |                           | 0b110                                         |           
 1                                                  |                           | 1                                             |           
+100                                                |                           | 100                                           |           
+15                                                 |                           | 15                                            |           
 15.0                                               |                           | 15.0                                          |           
-5                                                  |                           | 5                                             |           
+150                                                |                           | 150                                           |           
+2                                                  |                           | 2                                             |           
+25                                                 |                           | 25                                            |           
+3                                                  |                           | 3                                             |           
 50                                                 |                           | 50                                            |           
+6                                                  |                           | 6                                             |           
 70.7                                               |                           | 70.7                                          |           
-Binarioxd                                          | Binario                   |                                               |           
+@contBinarios                                      | Int                       |                                               |           
+@lado1                                             | Float                     |                                               |           
+@lado2                                             | Float                     |                                               |           
+@lado3                                             | Float                     |                                               |           
+@resultado                                         | String                    |                                               |           
 El numero ingresado NO es > 0 y < 50               |                           | El numero ingresado NO es > 0 y < 50          | 36        
 El numero ingresado es > 0 y < 50                  |                           | El numero ingresado es > 0 y < 50             | 33        
-El resultado de la suma es                         |                           | El resultado de la suma es                    | 26        
+El triangulo es:                                   |                           | El triangulo es:                              | 16        
+Equilatero                                         |                           | Equilatero                                    | 10        
+Escaleno                                           |                           | Escaleno                                      | 8         
 Estas probando el proyecto del grupo 14            |                           | Estas probando el proyecto del grupo 14       | 39        
-Hola                                               |                           | Hola                                          | 4         
-Ingrese un float                                   |                           | Ingrese un float                              | 16        
-Ingrese un int                                     |                           | Ingrese un int                                | 14        
+Hola!                                              |                           | Hola!                                         | 5         
+Ingrese un float:                                  |                           | Ingrese un float:                             | 17        
+Ingrese un int:                                    |                           | Ingrese un int:                               | 15        
 Ingrese un numero entero                           |                           | Ingrese un numero entero                      | 24        
-Ingrese un string                                  |                           | Ingrese un string                             | 17        
+Ingrese un string:                                 |                           | Ingrese un string:                            | 18        
+Isosceles                                          |                           | Isosceles                                     | 9         
+La cantidad                                        |                           | La cantidad                                   | 11        
 Su float es menor a 15.0 o mayor a 70.7            |                           | Su float es menor a 15.0 o mayor a 70.7       | 39        
+bin1                                               | Binario                   |                                               |           
 float1                                             | Float                     |                                               |           
 float2                                             | Float                     |                                               |           
 float3                                             | Float                     |                                               |           
