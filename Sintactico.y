@@ -177,7 +177,7 @@ lista_de_variables:
         lista_de_variables COMA ID {
                 
                 if(insertarListaOrdSinDupli(&ListaAignaciones, $3, sizeof(char[500]), compararArrojandoError) != TODO_OK || buscarEnLista(&lista_simbolos,$3,compararArrojandoError) != TODO_OK){
-                        printf("Error Semantico: Variable duplicada. Ya fue definida anteriormente.\n");
+                        printf("ERROR SEMATICO: Variable duplicada. Ya fue definida anteriormente.\n");
                         exit(1);
                 }
                 printf("                El analizador sintactico reconoce: <Lista_de_variables> --> <Lista_de_variables> COMA ID\n\n");
@@ -190,7 +190,7 @@ lista_de_variables:
                 }
               
                 if(insertarListaOrdSinDupli(&ListaAignaciones, $1, sizeof(char[500]), compararArrojandoError) != TODO_OK || buscarEnLista(&lista_simbolos,$1,compararArrojandoError) != TODO_OK){
-                        printf("Error Semantico: Variable duplicada. Ya fue definida anteriormente.\n");
+                        printf("ERROR SEMANTICO: Variable duplicada. Ya fue definida anteriormente.\n");
                         exit(1);
                 }
 
@@ -668,7 +668,7 @@ factor:
                 char *tipoObtenido;
                 tipoObtenido = retornarTipoDeDato($1);
                 if(strcmp(tipoObtenido,"String") == 0 || strcmp(tipoObtenido,"Binario") == 0){
-                     printf("ERROR SEMANTICO: Asignacion incorrecta.\n");
+                     printf("ERROR SEMANTICO: Expresion incorrecta, tipos de datos invalidos.\n");
                      exit(1);   
                 }
 

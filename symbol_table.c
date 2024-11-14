@@ -20,7 +20,7 @@ int validarVariableDeclarada(char* nombre) {
             current = current->sig;
         }
 
-    printf("Error Semantico: La variable '%s' no ha sido declarada antes de ser usada.\n", nombre);
+    printf("ERROR SEMANTICO: La variable '%s' no ha sido declarada antes de ser usada.\n", nombre);
     return ERROR;
 }
 
